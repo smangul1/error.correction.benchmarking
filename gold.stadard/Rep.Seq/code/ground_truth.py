@@ -53,7 +53,7 @@ for line in samlines:
     if orient == "16":
         true_read = reverse_complement(true_read)
     original_read = rw[read_name]
-    print read_name, original_read, true_read
+    print read_name, true_read
 
 
 
