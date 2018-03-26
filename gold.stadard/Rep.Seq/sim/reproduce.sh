@@ -1,5 +1,3 @@
-
-
 . /u/local/Modules/default/init/modules.sh
 module load bowtie2
 module load python/2.7
