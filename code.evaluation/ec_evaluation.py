@@ -11,9 +11,10 @@
 #    Proper logging
 #    Be sure tool, read ID, etc. (relevant info) is being passed to the function. 
 
-
-from Bio import pairwise2
+import os
+from Bio import pairwise2, SeqIO
 from logging import log, error
+
 
 
 def analyze_corrections(true_sequence, raw_sequence, ec_sequence):
@@ -45,9 +46,9 @@ def analyze_corrections(true_sequence, raw_sequence, ec_sequence):
     ec_3 = alignments_2[0][1]
 
     #TODO: Log these?
-    #print "True:", true_3
-    #print "Raw: ", raw_3
-    #print "EC:  ", ec_3
+    print "True:", true_3
+    print "Raw: ", raw_3
+    print "EC:  ", ec_3
 
     # base level statistics now that there is an "MSA" that we can compare.
     stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FP': 0, 'INDEL': 0, 'TRIM': 0}
@@ -69,20 +70,21 @@ def analyze_corrections(true_sequence, raw_sequence, ec_sequence):
 
             if (ec_bp == "-") and trim_marker == 0:
                 stats_dict['TRIM'] += 1
-                # stats_dict['FP'] -= 1
+                stats_dict['FP'] -= 1
                 trim = True
             elif (ec_bp == "-") and trim is True:
                 stats_dict['TRIM'] += 1
-                # stats_dict['FP'] -= 1
+                stats_dict['FP'] -= 1
             elif (true_bp == "-") or (raw_bp == "-") or (ec_bp == "-"):
                 stats_dict['INDEL'] += 1
-                # stats_dict['FP'] -= 1
+                stats_dict['FP'] -= 1
                 trim = False
             else:
                 trim = False
             trim_marker += 1
 
         if ec_bp == "-":
+            stats_dict['FP']+=1
             for backwards_ec_bp in reversed(ec_3):
                 if backwards_ec_bp == '-':
                     stats_dict['INDEL'] -= 1
@@ -97,18 +99,17 @@ def analyze_corrections(true_sequence, raw_sequence, ec_sequence):
             seq_ID = seq_classes[0]
         elif stats_dict['FP'] != 0 and stats_dict['INDEL'] == 0 and stats_dict['TRIM'] == 0:
             seq_ID = seq_classes[1]
-        elif stats_dict['FP'] != 0 and stats_dict['INDEL'] != 0:
-            seq_ID = seq_classes[2]
-        elif stats_dict['FP'] != 0 and stats_dict['TRIM'] != 0:
+        elif stats_dict['TRIM'] != 0:
             seq_ID = seq_classes[3]
-        elif stats_dict['TP'] != 0 and stats_dict['FP'] == 0:
+        elif stats_dict['INDEL'] != 0:
+            seq_ID = seq_classes[2]
+        elif stats_dict['TP'] != 0 and stats_dict['FP'] == 0 and stats_dict['FN'] == 0:
             seq_ID = seq_classes[4]
         else:
             seq_ID = seq_classes[5]
 
-        print "BASE LEVEL: ", stats_dict
-        print "READ LEVEL: ", seq_ID
-
+        #print "BASE LEVEL: ", stats_dict
+        #print "READ LEVEL: ", seq_ID
         return stats_dict, seq_ID
 
     else:
@@ -119,6 +120,20 @@ def analyze_corrections(true_sequence, raw_sequence, ec_sequence):
 
 ### Aggregate the results from each read into a data structure that can easily incorporate into excel.
 ### using the tool, dataset, and sequence ID.
+
+
+
+base_dir = os.path.join("C:\Users\Amanda Beth Chron\Desktop\Research\EC3\code.evaluation/testing_data")
+
+
+fastq_ec_parser = SeqIO.parse(base_dir+"/ec.fastq", 'fastq')
+fastq_raw_parser = SeqIO.parse(base_dir+"/raw.fastq", 'fastq')
+fastq_true_parser = SeqIO.parse(base_dir+"/true.fastq", 'fastq')
+
+for ec_rec, raw_rec, true_rec in zip(fastq_ec_parser, fastq_raw_parser, fastq_true_parser):
+    print ec_rec.description
+    print analyze_corrections(true_rec.seq, raw_rec.seq, ec_rec.seq)
+    print ""
 
 
 #Code for testing.
