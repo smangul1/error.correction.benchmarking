@@ -1,0 +1,56 @@
+@Sequence 1 (Read: TP, Base: TP=1 and TN=9)
+ACCGTAGTCC
++
+~~~~~~~~~~
+@Sequence 2 (Read: FN, Base: TP=1, FN=1, and TN=8)
+ACAGTAGTCC
++
+~~~~~~~~~~
+@Sequence 3 (Read: FP(normal), Base: FP=1 and TN=9)
+ACCGTGGTCC
++
+~~~~~~~~~~
+@Sequence 4 (Read: FP(normal), Base: FP=2 and TN=8)
+ACCGTGGTCC
++
+~~~~~~~~~~
+@Sequence 5 (Read: FP(normal), Base: TP=1, FP=1, and TN=8)
+ACAGTGGTCC
++
+~~~~~~~~~~
+@Sequence 6 (Read: TN, Base: TN=10)
+ACCGTGGTCC
++
+~~~~~~~~~~
+@Sequence 7 (Read: FP(normal), Base: TN=8, FP=1, FN=1)
+ACAGTGGTCC
++
+~~~~~~~~~~
+@Sequence 8 (Read: FP(indel), Base: TN=9, FP=1)
+ACCGTGGTCC
++
+~~~~~~~~~~
+@Sequence 9 (Read: FP(indel), Base: TN=10, FP=1)
+ACCGTGGTCCCC
++
+~~~~~~~~~~~~
+@Sequence 10 (Read: FP(indel), Base: TN=7, INDEL=5)
+ACCGTGGTCCCC
++
+~~~~~~~~~~~~
+@Sequence 11 (Read: FP(indel), Base: TN=8, FP=1, TP=1)
+ACCGTAGTCC
++
+~~~~~~~~~~
+@Sequence 12 (Read: FP(indel), Base: TN=8, FP=1, FN=1)
+ACCGTAGTCC
++
+~~~~~~~~~~
+@Sequence 13 (Read: FP(trimming), Base: TN=7)
+ACCGTGGTAC
++
+~~~~~~~~~~
+@Sequence 14 (Read: FP(trimming), Base: TN=7, TP=1)
+ACCGTGGTAC
++
+~~~~~~~~~~

@@ -1,0 +1,9 @@
+The 3 files in this directory are artificially created in order to asses the accuracy of the eval.py script.
+
+Each sequence in the file will specify the result that the script should produce at the read level and the base pair level.
+
+The script will perform operations to asses these files and aggregate the results for the set, producing totals:
+    Read count (FP, FN, TN, TP) which should total to the number of sequences in the file.
+    Base count (FP, FN, TN, TP) which should total to the number of basepairs in the true.fastq file.
+
+
