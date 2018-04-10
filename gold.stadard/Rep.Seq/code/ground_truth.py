@@ -37,7 +37,6 @@ for record in SeqIO.parse(handle, "fastq"):
     rw[record.id] = record.seq.tostring()
 handle.close()
 
-
 with open(sam) as f:
     samlines = f.readlines()
 
@@ -47,14 +46,17 @@ samlines = map(lambda x: x.strip().split("\t"), samlines)
 for line in samlines:
     read_name, orient, refseq, startpos = line[:4]
     length = len(line[9])
+    quality = line[10]
     if refseq not in sw:
         continue
     true_read = sw[refseq][int(startpos) - 1: int(startpos) - 1 + int(length)]
     if orient == "16":
         true_read = reverse_complement(true_read)
     original_read = rw[read_name]
-    print read_name, true_read
-
+    print read_name 
+    print true_read
+    print '+'
+    print quality
 
 
 
