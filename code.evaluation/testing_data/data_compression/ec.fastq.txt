@@ -1,0 +1,30 @@
+Sequence 1 (Read: TP, Base: TP=1 and TN=9)	10	6	TP	G	A	G
+Sequence 2 (Read: FN, Base: TP=1, FN=1, and TN=8)	10	3	FN	C	A	A
+Sequence 2 (Read: FN, Base: TP=1, FN=1, and TN=8)	10	6	TP	G	A	G
+Sequence 3 (Read: FP(normal), Base: FP=1 and TN=9)	10	9	FP	C	C	A
+Sequence 4 (Read: FP(normal), Base: FP=2 and TN=8)	10	3	FP	C	C	A
+Sequence 4 (Read: FP(normal), Base: FP=2 and TN=8)	10	9	FP	C	C	A
+Sequence 5 (Read: FP(normal), Base: TP=1, FP=1, and TN=8)	10	3	TP	C	A	C
+Sequence 5 (Read: FP(normal), Base: TP=1, FP=1, and TN=8)	10	9	FP	C	C	A
+Sequence 7 (Read: FP(normal), Base: TN=8, FP=1, FN=1)	10	3	FN	C	A	A
+Sequence 7 (Read: FP(normal), Base: TN=8, FP=1, FN=1)	10	9	FP	C	C	A
+Sequence 8 (Read: FP(indel), Base: TN=10, FP=1)	10	8	INDEL	T	T	-
+Sequence 9 (Read: FP(indel), Base: TN=10, FP=1)	12	5	INDEL	T	T	-
+Sequence 9 (Read: FP(indel), Base: TN=10, FP=1)	12	7	FP	G	G	A
+Sequence 9 (Read: FP(indel), Base: TN=10, FP=1)	12	9	INDEL	C	C	-
+Sequence 9 (Read: FP(indel), Base: TN=10, FP=1)	12	10	INDEL	C	C	-
+Sequence 10 (Read: FP(indel), Base: TN=7, INDEL=5)	12	6	INDEL	G	G	-
+Sequence 10 (Read: FP(indel), Base: TN=7, INDEL=5)	12	7	INDEL	G	G	-
+Sequence 10 (Read: FP(indel), Base: TN=7, INDEL=5)	12	8	INDEL	T	T	-
+Sequence 10 (Read: FP(indel), Base: TN=7, INDEL=5)	12	9	INDEL	C	C	-
+Sequence 10 (Read: FP(indel), Base: TN=7, INDEL=5)	12	10	INDEL	C	C	-
+Sequence 11 (Read: FP(indel), Base: TN=8, FP=1, TP=1)	10	6	TP	G	A	G
+Sequence 11 (Read: FP(indel), Base: TN=8, FP=1, TP=1)	10	8	INDEL	T	T	-
+Sequence 12 (Read: FP(indel), Base: TN=8, FP=1, FN=1)	10	6	FN	G	A	A
+Sequence 12 (Read: FP(indel), Base: TN=8, FP=1, FN=1)	10	8	INDEL	T	T	-
+Sequence 13 (Read: FP(trimming), Base: TN=7)	10	8	TRIM	T	T	-
+Sequence 13 (Read: FP(trimming), Base: TN=7)	10	9	TRIM	C	A	-
+Sequence 13 (Read: FP(trimming), Base: TN=7)	10	10	TRIM	C	C	-
+Sequence 14 (Read: FP(trimming), Base: TN=7, TP=1)	10	1	TRIM	A	A	-
+Sequence 14 (Read: FP(trimming), Base: TN=7, TP=1)	10	2	TRIM	C	C	-
+Sequence 14 (Read: FP(trimming), Base: TN=7, TP=1)	10	9	TP	C	A	C

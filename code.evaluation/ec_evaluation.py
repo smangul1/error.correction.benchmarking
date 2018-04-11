@@ -1,39 +1,29 @@
-
-######################################################################
+#####################################################################################
 # Evaluation Code for Error Correction Benchmarking
 #   project zar-lab ucla
 #   3/27/18
 
-#  Functions Contained: analyze_corrections,
-######################################################################
+#  Functions Contained: msa, analyze_bases, analyze_reads
+#####################################################################################
 
 # TODO:
 #    Proper logging
-#    Be sure tool, read ID, etc. (relevant info) is being passed to the function. 
+#    Be sure tool, read ID, etc. (relevant info) is being passed to the function.
 
-import os
+
 from Bio import pairwise2, SeqIO
-from logging import log, error
+from ec_data_compression import store_base_data, store_read_data, baseline, data_compression, my_log
+import os
+import logging
+import sys
+import csv
 
 
-
-def analyze_corrections(true_sequence, raw_sequence, ec_sequence):
-    """Keith Mitchell (keithgmitchell@g.ucla.edu).
-        Function: Analyze true, raw(error_prone), and flawed/flawless error corrected reads
-        Input 1: (string) true_sequence to be compared to raw and tool error corrected seq.
-        Input 2: (string) raw_sequence (error prone sequence) that is to be compare to true and error corrected seq.
-        Input 3: (string) ec_sequence (error corrected sequence) to be analyzed for flawed/flawless error correction
-        Returns:
-            Object 1: (dictionary) stats_dict which has the base level counts for the sequence:
-                EX:        stats_dict = {'TN':0, 'TP':0, 'FN':0, 'FP':0, 'INDEL':0, 'TRIM': 0}
-            Object 2: (string) seq_ID which dictates the read level classification (one of the following list):
-                EX:        "TN", "FP(NORMAL)", "FP(INDEL)", "FP(TRIMMING)", "TP", "FN"
-    """
-
-    ## Series of global alignments that act as a sort of multiple sequence aligner.
-    ## this performs a star based "MSA" assuming that True and Raw reads are the most similar(due to potential trims)
-    # 1. Alignment 1- true_sequence|raw_sequence = true_2, raw_3
-    # 2. Alignment 2- true_2|ec_sequence = true_3, ec_3
+def msa(true_sequence, raw_sequence, ec_sequence, description):
+    # Series of global alignments that act as a sort of multiple sequence aligner.
+    # this performs a star based "MSA" assuming that True and Raw reads are the most similar(due to potential trims)
+    #   1. Alignment 1- true_sequence|raw_sequence = true_2, raw_3
+    #   2. Alignment 2- true_2|ec_sequence = true_3, ec_3
 
     alignments = pairwise2.align.globalms(true_sequence, raw_sequence, 5, -4, -10, -0.1)
 
@@ -46,102 +36,179 @@ def analyze_corrections(true_sequence, raw_sequence, ec_sequence):
     ec_3 = alignments_2[0][1]
 
     #TODO: Log these?
+    print description
     print "True:", true_3
     print "Raw: ", raw_3
     print "EC:  ", ec_3
 
+    return true_3, raw_3, ec_3
+
+
+def analyze_bases(true_3, raw_3, ec_3):
+
+    """Keith Mitchell (keithgmitchell@g.ucla.edu).
+            Function: Analyze true, raw(error_prone), and flawed/flawless error corrected reads
+            Input 1: (string) true_sequence to be compared to raw and tool error corrected seq.
+            Input 2: (string) raw_sequence (error prone sequence) that is to be compare to true and error corrected seq.
+            Input 3: (string) ec_sequence (error corrected sequence) to be analyzed for flawed/flawless error correction
+            Returns:
+                Object 1: (dictionary) stats_dict which has the base level counts for the sequence:
+                    EX:        stats_dict = {'TN':0, 'TP':0, 'FN':0, 'FP':0, 'INDEL':0, 'TRIM': 0}
+    """
+
+
+
     # base level statistics now that there is an "MSA" that we can compare.
     stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FP': 0, 'INDEL': 0, 'TRIM': 0}
+    position_calls = {}
 
     # check to make sure the "MSA" is same length... hopefully this should always be the case
     if len(true_3) == len(raw_3) == len(ec_3):
         # iterate through each column of the "MSA"
-        trim_marker = 0
+        trim_marker, pos_marker = 0, 1
         trim = False
         for true_bp, raw_bp, ec_bp in zip(true_3, raw_3, ec_3):
             if true_bp == raw_bp == ec_bp:
                 stats_dict['TN'] += 1
             elif true_bp == raw_bp != ec_bp:
                 stats_dict['FP'] += 1
+                position_calls[pos_marker] = ['FP', true_bp, raw_bp, ec_bp]
             elif true_bp != raw_bp != ec_bp and ec_bp == true_bp:
                 stats_dict['TP'] += 1
+                position_calls[pos_marker] = ['TP', true_bp, raw_bp, ec_bp]
             elif true_bp != raw_bp == ec_bp:
                 stats_dict['FN'] += 1
+                position_calls[pos_marker] = ['FN', true_bp, raw_bp, ec_bp]
 
             if (ec_bp == "-") and trim_marker == 0:
                 stats_dict['TRIM'] += 1
                 stats_dict['FP'] -= 1
+                position_calls[pos_marker] = ['TRIM', true_bp, raw_bp, ec_bp]
                 trim = True
             elif (ec_bp == "-") and trim is True:
                 stats_dict['TRIM'] += 1
                 stats_dict['FP'] -= 1
+                position_calls[pos_marker] = ['TRIM', true_bp, raw_bp, ec_bp]
             elif (true_bp == "-") or (raw_bp == "-") or (ec_bp == "-"):
                 stats_dict['INDEL'] += 1
                 stats_dict['FP'] -= 1
                 trim = False
+                position_calls[pos_marker] = ['INDEL', true_bp, raw_bp, ec_bp]
+
             else:
                 trim = False
             trim_marker += 1
+            pos_marker += 1
 
+        pos_marker -= 1
         if ec_bp == "-":
             stats_dict['FP']+=1
-            for backwards_ec_bp in reversed(ec_3):
-                if backwards_ec_bp == '-':
+            for true_bp, raw_bp, ec_bp in zip(reversed(true_3), reversed(raw_3), reversed(ec_3)):
+                if ec_bp == '-':
                     stats_dict['INDEL'] -= 1
                     stats_dict['TRIM'] += 1
+                    position_calls[pos_marker] = ['TRIM', true_bp, raw_bp, ec_bp]
                 else:
                     break
-
-        ##this portion decides what to classify the sequence as a whole as once the bases have been analyzed
-        seq_classes = ["TN", "FP(NORMAL)", "FP(INDEL)", "FP(TRIMMING)", "TP", "FN"]
-        seq_ID = ""
-        if stats_dict['TN'] == len(true_3):
-            seq_ID = seq_classes[0]
-        elif stats_dict['FP'] != 0 and stats_dict['INDEL'] == 0 and stats_dict['TRIM'] == 0:
-            seq_ID = seq_classes[1]
-        elif stats_dict['TRIM'] != 0:
-            seq_ID = seq_classes[3]
-        elif stats_dict['INDEL'] != 0:
-            seq_ID = seq_classes[2]
-        elif stats_dict['TP'] != 0 and stats_dict['FP'] == 0 and stats_dict['FN'] == 0:
-            seq_ID = seq_classes[4]
-        else:
-            seq_ID = seq_classes[5]
-
-        #print "BASE LEVEL: ", stats_dict
-        #print "READ LEVEL: ", seq_ID
-        return stats_dict, seq_ID
+                pos_marker -= 1
+        length = len(true_3)
+        return stats_dict, length, position_calls
 
     else:
-        # TODO: Log the name of the read and other pertenant info.
-        # log.error(true_3, raw_3, ec_3)... look at apeiron code for library
-        return None, None
-
-
-### Aggregate the results from each read into a data structure that can easily incorporate into excel.
-### using the tool, dataset, and sequence ID.
+        return None
 
 
 
-base_dir = os.path.join("C:\Users\Amanda Beth Chron\Desktop\Research\EC3\code.evaluation/testing_data")
+def analyze_read(stats_dict, length):
+
+    """Keith Mitchell (keithgmitchell@g.ucla.edu).
+        Function: Analyze true, raw(error_prone), and flawed/flawless error corrected reads
+        Input 1: (string) true_sequence to be compared to raw and tool error corrected seq.
+        Input 2: (string) raw_sequence (error prone sequence) that is to be compare to true and error corrected seq.
+        Input 3: (string) ec_sequence (error corrected sequence) to be analyzed for flawed/flawless error correction
+        Returns:
+            Object 1: string - read level classification given the base counts passed to it for a given read:
+                EX:        ["TN", "FP(NORMAL)", "FP(INDEL)", "FP(TRIMMING), "TP", "TN"]
+
+    """
+
+    ##this portion decides what to classify the sequence as a whole as once the bases have been analyzed
+    seq_classes = ["TN", "FP(NORMAL)", "FP(INDEL)", "FP(TRIMMING)", "TP", "FN"]
+    seq_ID = ""
+
+    # If all bases are the TN then the read is a TN.
+    if stats_dict['TN'] == length:
+        seq_ID = seq_classes[0]
+
+    # If there are normal FP but no other FP(INDEL/trim) then the read is a normal FP.
+    elif stats_dict['FP'] != 0 and stats_dict['INDEL'] == 0 and stats_dict['TRIM'] == 0:
+        seq_ID = seq_classes[1]
+
+    # Next if there are FP from trimming then the read is as well.
+    elif stats_dict['TRIM'] != 0:
+        seq_ID = seq_classes[3]
+
+    # Next if there are FP from INDEL then the read is as well.
+    elif stats_dict['INDEL'] != 0:
+        seq_ID = seq_classes[2]
+
+    # If there are any TP bases and no FN bases then the read is a TP
+    elif stats_dict['TP'] != 0 and stats_dict['FP'] == 0 and stats_dict['FN'] == 0:
+        seq_ID = seq_classes[4]
+
+    # Otherwise the read is a FN
+    else:
+        seq_ID = seq_classes[5]
+
+    return seq_ID
 
 
-fastq_ec_parser = SeqIO.parse(base_dir+"/ec.fastq", 'fastq')
-fastq_raw_parser = SeqIO.parse(base_dir+"/raw.fastq", 'fastq')
-fastq_true_parser = SeqIO.parse(base_dir+"/true.fastq", 'fastq')
+if __name__ == "__main__":
+    try:
+        #Todo: make this for taking in strings.
+        base_dir = sys.argv[1]
+        true_filename = sys.argv[2]
+        raw_filename = sys.argv[3]
+        ec_filename = sys.argv[4]
+    except:
+        logging.warn('Example: python ec_evaluation.py "C:\Users\Amanda Beth Chron\Desktop\Research\EC3\code.evaluation/testing_data" "true.fastq" "raw.fastq" "ec.fastq"')
+        sys.exit()
 
-for ec_rec, raw_rec, true_rec in zip(fastq_ec_parser, fastq_raw_parser, fastq_true_parser):
-    print ec_rec.description
-    print analyze_corrections(true_rec.seq, raw_rec.seq, ec_rec.seq)
-    print ""
+    base_dir_join = os.path.join(str(base_dir))
+    fastq_ec_parser = SeqIO.parse(base_dir_join + "/" + str(ec_filename), 'fastq')
+    fastq_raw_parser = SeqIO.parse(base_dir_join + "/" + str(raw_filename), 'fastq')
+    fastq_true_parser = SeqIO.parse(base_dir_join + "/" + str(true_filename), 'fastq')
 
 
-#Code for testing.
-'''
-true_sequence = 'ACGTGGTCCA'
-raw_sequence = 'ACGTTGTCGA'
-ec_sequence = 'TGGCGG'
+    #Todo: Might want to be sure these have the same name (and are the same read) before proceeding
+    # check if readname.description is the same??
+    for ec_rec, raw_rec, true_rec in zip(fastq_ec_parser, fastq_raw_parser, fastq_true_parser):
+        alignment = msa(true_rec.seq, raw_rec.seq, ec_rec.seq, ec_rec.description)
+        base_counts = analyze_bases(alignment[0], alignment[1], alignment[2])
 
-analyze_corrections(true_sequence, raw_sequence, ec_sequence)
-'''
+        if base_counts is None:
+            message = "FAILURE: Base count == 'None'(improper MSA) [TRUE: %s], [RAW: %s], [EC: %s]" %(true_rec.description, raw_rec.description, ec_rec.description)
+            my_log(file_name, message)
+            continue
+        else:
+            position_calls = base_counts[2]
+            length = base_counts[1]
+            base_stats = base_counts[0]
+
+            read_class = analyze_read(base_stats, length)
+
+            store_base_data(base_dir_join, ec_filename, ec_rec, length, base_stats)
+            store_read_data(base_dir_join, ec_filename, ec_rec, read_class)
+            baseline(base_dir_join, ec_filename, ec_rec, length, base_stats)
+            data_compression(base_dir_join, ec_filename, ec_rec, length, position_calls)
+
+
+
+    message = "SUCCESS: %s" % (ec_filename)
+    my_log(ec_filename, message)
+
+        #log when the sum is not equal to the length aka something went wrong (try and except?)
+        #logging.warn('Input file name, ouput file name not provided')
+
+
 

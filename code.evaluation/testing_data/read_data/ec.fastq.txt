@@ -1,0 +1,14 @@
+Sequence 1 (Read: TP, Base: TP=1 and TN=9)	TP
+Sequence 2 (Read: FN, Base: TP=1, FN=1, and TN=8)	FN
+Sequence 3 (Read: FP(normal), Base: FP=1 and TN=9)	FP(NORMAL)
+Sequence 4 (Read: FP(normal), Base: FP=2 and TN=8)	FP(NORMAL)
+Sequence 5 (Read: FP(normal), Base: TP=1, FP=1, and TN=8)	FP(NORMAL)
+Sequence 6 (Read: TN, Base: TN=10)	TN
+Sequence 7 (Read: FP(normal), Base: TN=8, FP=1, FN=1)	FP(NORMAL)
+Sequence 8 (Read: FP(indel), Base: TN=10, FP=1)	FP(INDEL)
+Sequence 9 (Read: FP(indel), Base: TN=10, FP=1)	FP(INDEL)
+Sequence 10 (Read: FP(indel), Base: TN=7, INDEL=5)	FP(INDEL)
+Sequence 11 (Read: FP(indel), Base: TN=8, FP=1, TP=1)	FP(INDEL)
+Sequence 12 (Read: FP(indel), Base: TN=8, FP=1, FN=1)	FP(INDEL)
+Sequence 13 (Read: FP(trimming), Base: TN=7)	FP(TRIMMING)
+Sequence 14 (Read: FP(trimming), Base: TN=7, TP=1)	FP(TRIMMING)
