@@ -1,7 +1,9 @@
 #####################################################################################
 # Evaluation Code for Error Correction Benchmarking
 #   project zar-lab ucla
-#   3/27/18
+#   4/20/18
+#   supervisor: Serghei Mangul
+#   author: Keith Mitchell
 
 #  Functions Contained: msa, analyze_bases, analyze_reads
 #####################################################################################
@@ -20,12 +22,6 @@ import csv
 
 
 def msa(true_sequence, raw_sequence, ec_sequence, description):
-    """Keith Mitchell (keithgmitchell@g.ucla.edu).
-             Series of global alignments that act as a sort of multiple sequence aligner.
-             this performs a star based "MSA" assuming that True and Raw reads are the most similar(due to potential trims)
-               1. Alignment 1- true_sequence|raw_sequence = true_2, raw_3
-               2. Alignment 2- true_2|ec_sequence = true_3, ec_3
-     """
 
 
     alignments = pairwise2.align.globalms(true_sequence, raw_sequence, 5, -4, -10, -0.1)
@@ -166,11 +162,6 @@ def analyze_read(stats_dict, length):
 
 
 if __name__ == "__main__":
-
-    """Keith Mitchell (keithgmitchell@g.ucla.edu).
-
-
-    """
 
     try:
         #Todo: make this for taking in strings.

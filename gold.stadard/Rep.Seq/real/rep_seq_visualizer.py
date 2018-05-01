@@ -1,15 +1,13 @@
 #####################################################################################
-# Evaluation Code for Error Correction Benchmarking
+# Code to visualize the grouping size for the UMIs
 #   project zar-lab ucla
-#   3/27/18
+#   4/30/18
+#   supervisor: Serghei Mangul
+#   author: Keith Mitchell
 
-#  Functions Contained: msa, analyze_bases, analyze_reads
+
+#  Functions Contained: umi_group, handle_UMIs
 #####################################################################################
-
-# TODO:
-#    Proper logging
-#    Be sure tool, read ID, etc. (relevant info) is being passed to the function.
-
 
 from Bio import pairwise2, SeqIO
 import os
