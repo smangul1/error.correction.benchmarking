@@ -20,10 +20,13 @@ import csv
 
 
 def msa(true_sequence, raw_sequence, ec_sequence, description):
-    # Series of global alignments that act as a sort of multiple sequence aligner.
-    # this performs a star based "MSA" assuming that True and Raw reads are the most similar(due to potential trims)
-    #   1. Alignment 1- true_sequence|raw_sequence = true_2, raw_3
-    #   2. Alignment 2- true_2|ec_sequence = true_3, ec_3
+    """Keith Mitchell (keithgmitchell@g.ucla.edu).
+             Series of global alignments that act as a sort of multiple sequence aligner.
+             this performs a star based "MSA" assuming that True and Raw reads are the most similar(due to potential trims)
+               1. Alignment 1- true_sequence|raw_sequence = true_2, raw_3
+               2. Alignment 2- true_2|ec_sequence = true_3, ec_3
+     """
+
 
     alignments = pairwise2.align.globalms(true_sequence, raw_sequence, 5, -4, -10, -0.1)
 
@@ -37,9 +40,10 @@ def msa(true_sequence, raw_sequence, ec_sequence, description):
 
     #TODO: Log these?
     print description
-    print "True:", true_3
-    print "Raw: ", raw_3
-    print "EC:  ", ec_3
+    print "True:", true_3.replace('-', '')
+    print "Raw: ", raw_3.replace('-', '')
+    print "EC:  ", ec_3.replace('-', '')
+
 
     return true_3, raw_3, ec_3
 
@@ -55,8 +59,6 @@ def analyze_bases(true_3, raw_3, ec_3):
                 Object 1: (dictionary) stats_dict which has the base level counts for the sequence:
                     EX:        stats_dict = {'TN':0, 'TP':0, 'FN':0, 'FP':0, 'INDEL':0, 'TRIM': 0}
     """
-
-
 
     # base level statistics now that there is an "MSA" that we can compare.
     stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FP': 0, 'INDEL': 0, 'TRIM': 0}
@@ -164,48 +166,91 @@ def analyze_read(stats_dict, length):
 
 
 if __name__ == "__main__":
+
+    """Keith Mitchell (keithgmitchell@g.ucla.edu).
+
+
+    """
+
     try:
         #Todo: make this for taking in strings.
         base_dir = sys.argv[1]
         true_filename = sys.argv[2]
-        raw_filename = sys.argv[3]
-        ec_filename = sys.argv[4]
+        raw1_filename = sys.argv[3]
+        raw2_filename = sys.argv[4]
+        ec1_filename = sys.argv[5]
+        ec2_filename = sys.argv[6]
     except:
-        logging.warn('Example: python ec_evaluation.py "C:\Users\Amanda Beth Chron\Desktop\Research\EC3\code.evaluation/testing_data" "true.fastq" "raw.fastq" "ec.fastq"')
+        logging.warn('Example: python ec_evaluation.py "C:\Users\Amanda Beth Chron\Desktop\Testing Reads" "IGH_sim_rl_50_cov_1.true.fastq" "IGH_sim_rl_50_cov_1_R1.fastq" "IGH_sim_rl_50_cov_1_R2.fastq" "IGH_sim_rl_50_cov_1_R1.fastq.corrected" "IGH_sim_rl_50_cov_1_R2.fastq.corrected"')
         sys.exit()
 
     base_dir_join = os.path.join(str(base_dir))
-    fastq_ec_parser = SeqIO.parse(base_dir_join + "/" + str(ec_filename), 'fastq')
-    fastq_raw_parser = SeqIO.parse(base_dir_join + "/" + str(raw_filename), 'fastq')
+    fastq_ec1_parser = SeqIO.parse(base_dir_join + "/" + str(ec1_filename), 'fastq')
+    fastq_ec2_parser = SeqIO.parse(base_dir_join + "/" + str(ec2_filename), 'fastq')
+    fastq_raw1_parser = SeqIO.parse(base_dir_join + "/" + str(raw1_filename), 'fastq')
+    fastq_raw2_parser = SeqIO.parse(base_dir_join + "/" + str(raw2_filename), 'fastq')
     fastq_true_parser = SeqIO.parse(base_dir_join + "/" + str(true_filename), 'fastq')
 
+    #TODO: clean this up depending on what is needed for the files to be inputted.
+    for true_rec in fastq_true_parser:
+        true_check = true_rec.description
+        fastq_raw1_parser = SeqIO.parse(base_dir_join + "/" + str(raw1_filename), 'fastq')
+        fastq_raw2_parser = SeqIO.parse(base_dir_join + "/" + str(raw2_filename), 'fastq')
+        for raw1_rec, raw2_rec in zip(fastq_raw1_parser, fastq_raw2_parser):
+            raw1_check = raw1_rec.description.split(' ')
+            raw2_check = raw2_rec.description.split(' ')
+            #print "1:    ", true_check, raw1_check[0], raw2_check[0]
+            raw_rec = None
+            if true_check == raw1_check[0]:
+                raw_rec = raw1_rec
+            elif true_check == raw2_check[0]:
+                raw_rec = raw2_rec
 
-    #Todo: Might want to be sure these have the same name (and are the same read) before proceeding
-    # check if readname.description is the same??
-    for ec_rec, raw_rec, true_rec in zip(fastq_ec_parser, fastq_raw_parser, fastq_true_parser):
-        alignment = msa(true_rec.seq, raw_rec.seq, ec_rec.seq, ec_rec.description)
-        base_counts = analyze_bases(alignment[0], alignment[1], alignment[2])
+            if raw_rec is not None:
+                fastq_ec1_parser = SeqIO.parse(base_dir_join + "/" + str(ec1_filename), 'fastq')
+                fastq_ec2_parser = SeqIO.parse(base_dir_join + "/" + str(ec2_filename), 'fastq')
+                for ec1_rec, ec2_rec in zip(fastq_ec1_parser, fastq_ec2_parser):
+                    ec1_check = ec1_rec.description[0:8]
+                    ec2_check = ec2_rec.description[0:8]
+                    #print "2:    ", true_check, ec1_check, ec2_check
+                    ec_rec = None
+                    if true_check == ec1_check:
+                        ec_rec = ec1_rec
+                    elif true_check == ec2_check:
+                        ec_rec = ec2_rec
 
-        if base_counts is None:
-            message = "FAILURE: Base count == 'None'(improper MSA) [TRUE: %s], [RAW: %s], [EC: %s]" %(true_rec.description, raw_rec.description, ec_rec.description)
-            my_log(file_name, message)
-            continue
-        else:
-            position_calls = base_counts[2]
-            length = base_counts[1]
-            base_stats = base_counts[0]
+                    if ec_rec is not None:
+                        alignment = msa(true_rec.seq, raw_rec.seq, ec_rec.seq, ec_rec.description)
+                        base_counts = analyze_bases(alignment[0], alignment[1], alignment[2])
 
-            read_class = analyze_read(base_stats, length)
+                        if base_counts is None:
+                            message = "FAILURE: Base count == 'None'(improper MSA) [TRUE: %s], [RAW: %s], [EC: %s]" %(true_rec.description, raw_rec.description, ec_rec.description)
+                            my_log(true_filename, message)
+                            print ""
+                            print ""
+                        else:
+                            position_calls = base_counts[2]
+                            length = base_counts[1]
+                            base_stats = base_counts[0]
+                            read_class = analyze_read(base_stats, length)
 
-            store_base_data(base_dir_join, ec_filename, ec_rec, length, base_stats)
-            store_read_data(base_dir_join, ec_filename, ec_rec, read_class)
-            baseline(base_dir_join, ec_filename, ec_rec, length, base_stats)
-            data_compression(base_dir_join, ec_filename, ec_rec, length, position_calls)
+                            print base_stats
+                            print read_class
+                            print ""
 
 
+                        break
+                break
 
-    message = "SUCCESS: %s" % (ec_filename)
-    my_log(ec_filename, message)
+
+    # store_base_data(base_dir_join, ec_filename, ec_rec, length, base_stats)
+    # store_read_data(base_dir_join, ec_filename, ec_rec, read_class)
+    # baseline(base_dir_join, ec_filename, ec_rec, length, base_stats)
+    # data_compression(base_dir_join, ec_filename, ec_rec, length, position_calls)
+
+
+    message = "SUCCESS: %s, %s" % (ec1_filename, ec2_filename)
+    my_log(true_filename, message)
 
         #log when the sum is not equal to the length aka something went wrong (try and except?)
         #logging.warn('Input file name, ouput file name not provided')
