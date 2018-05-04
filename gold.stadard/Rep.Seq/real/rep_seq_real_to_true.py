@@ -34,7 +34,7 @@ import argparse
 def write_true(true, group, true_dir):
     for item in group[1]:
         directories = item[2].split('/')
-        with open(os.path.join(true_dir.strip('\r')) + '/true/' + directories[len(directories)-1].strip('fastq') + '%s%s' % ('_true','.fastq'), 'a') as true_out:
+        with open(os.path.join(true_dir.strip('\r')) + 'true/' + directories[len(directories)-1].strip('fastq') + '%s%s' % ('_true','.fastq'), 'a') as true_out:
             UMIs = group[0]
             reconstruct_true = UMIs[0] + ''.join(true) + UMIs[1]
             quality_list = ['~' for x in range(0, len(reconstruct_true))]
@@ -47,7 +47,7 @@ def rewrite_raw(group, true_dir):
     for item in group[1]:
         directories = item[2].split('/')
         # with open(os.path.join(true_dir.strip('\r')) + '/' + directories[len(directories)-1] + '%s%s' % ('_true','.fastq'), 'a') as raw_out:
-        with open(os.path.join(true_dir.strip('\r')) + '/raw/' + directories[len(directories) - 1].strip('.fastq') + '%s%s' % ('_raw', '.fastq'), 'a') as raw_out:
+        with open(os.path.join(true_dir.strip('\r')) + 'raw/' + directories[len(directories) - 1].strip('.fastq') + '%s%s' % ('_raw', '.fastq'), 'a') as raw_out:
             UMIs = group[0]
             reconstruct_raw = UMIs[0] + ''.join(item[0]) + UMIs[1]
             quality_list = ['~' for x in range(0, len(reconstruct_raw))]
