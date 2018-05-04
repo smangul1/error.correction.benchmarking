@@ -109,7 +109,7 @@ def handle_UMIs(files, true_dir):
                 consensus = [get_base_consensus(base_counts) for base_counts in counts]
                 if None not in consensus:
                     write_true(consensus, item, true_dir)
-                    rewrite_raw(item)
+                    rewrite_raw(item, true_dir)
                 else:
                     continue
             else:
