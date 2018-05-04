@@ -51,10 +51,10 @@ def rewrite_raw(group, true_dir):
             UMIs = group[0]
             reconstruct_raw = UMIs[0] + ''.join(item[0]) + UMIs[1]
             quality_list = ['~' for x in range(0, len(reconstruct_raw))]
-            true_out.write('@%s' % (str(item[1]) + " Raw" + '\n'))
-            true_out.write(reconstruct_raw + '\n')
-            true_out.write('+%s' % (str(item[1]) + " Raw" + '\n'))
-            true_out.write(''.join(quality_list) + '\n')
+            raw_out.write('@%s' % (str(item[1]) + " Raw" + '\n'))
+            raw_out.write(reconstruct_raw + '\n')
+            raw_out.write('+%s' % (str(item[1]) + " Raw" + '\n'))
+            raw_out.write(''.join(quality_list) + '\n')
 
 def get_base_consensus(base_dict):
     for item in base_dict.items():
