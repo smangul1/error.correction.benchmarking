@@ -27,7 +27,6 @@
 
 from Bio import pairwise2, SeqIO
 import os
-import logging
 import sys
 import csv
 
@@ -38,17 +37,17 @@ def my_log(file_name, message):
         logging.writerow([file_name, message])
 
 
-def write_true(true, grouped_dict, true_dir):
-    for item in grouped_dict.items():
-        with open(true_dir + item[1][2] + '%s%s' % ('_true','.fastq'), 'a') as true_out:
-
-            UMIs = item[0].split(',')
-            reconstruct_true = UMIs[0] + true + UMIs[1]
-            quality = str.append('~' for x in range(0, len(reconstruct_true)))
-
-            true_out.write(['@%s%s' % (true[1][1], "True")])
-            true_out.write(reconstruct_true)
-            true_out.write(quality)
+def write_true(true, group, true_dir):
+    for item in group[1]:
+        directories = item[2].split('/')
+        with open(os.path.join(true_dir.strip('\r')) + '/' + directories[len(directories)-1] + '%s%s' % ('_true','.fastq'), 'a') as true_out:
+            UMIs = group[0]
+            reconstruct_true = UMIs[0] + ''.join(true) + UMIs[1]
+            quality_list = ['~' for x in range(0, len(reconstruct_true))]
+            true_out.write('@%s' % (str(item[1]) + " True" + '\n'))
+            true_out.write(reconstruct_true + '\n')
+            true_out.write('+%s' % (str(item[1]) + " True" + '\n'))
+            true_out.write(''.join(quality_list) + '\n')
 
 
 def get_base_consensus(base_dict):
@@ -68,6 +67,7 @@ def produce_counts(dict_item):
                 base_count[base] += 1
             else:
                 base_count[base] = 1
+
             base_count['Total'] += 1
     return pos_list
 
@@ -84,13 +84,16 @@ def handle_UMIs(files, true_dir):
     umi_dict = {}
     for file in files:
         fastq_parser = SeqIO.parse(file, 'fastq')
-
+        counter = 0
         #length of the sequences here are 238 but why does the file say 152
         for read in fastq_parser:
-            start = read.seq[0:12]
-            end = read.seq[len(read.seq)-12: len(read.seq)]
-            trim = read.seq[12:len(read.seq)-12]
-            umi_group(umi_dict, start, end, trim, read.description, file)
+            if counter < 50000:
+                start = read.seq[0:12]
+                end = read.seq[len(read.seq)-12: len(read.seq)]
+                trim = read.seq[12:len(read.seq)-12]
+                umi_group(umi_dict, start, end, trim, read.description, file)
+            else:
+                break
 
     for item in umi_dict.items():
 
@@ -99,21 +102,10 @@ def handle_UMIs(files, true_dir):
         if len(item[1]) > 5:
             counts = produce_counts(item[1])
             consensus = [get_base_consensus(base_counts) for base_counts in counts]
-
             if None not in consensus:
                 write_true(consensus, item, true_dir)
             else:
-                # my_log(item[0], "No consensus found....")
                 continue
-
-        # with open("help.txt", 'a') as write_csv:
-
-        # open_csv = csv.writer(write_csv)
-        # open_csv.writerow('')
-        # open_csv.writerow( [item[0],] )
-        #
-        # for value in item[1]:
-        #      open_csv.writerow( [str(value[0]), ])
 
 
 if __name__ == "__main__":
@@ -121,14 +113,13 @@ if __name__ == "__main__":
         true_dir = sys.argv[1]
         raw_dir = sys.argv[2]
     except:
-        #logging.warn('Example: python rep_seq_real_to_true.py "C:\Users\Amanda Beth Chron\Desktop\Research\EC3\gold.stadard\Rep.Seq/real"')
-        #logging.warn('Example: python rep_seq_real_to_true.py "C:\Users\Amanda Beth Chron\Desktop\Research\EC3\gold.stadard\Rep.Seq\real\data\"')
-        # python rep_seq_real_to_true.py "/u/flashscratch/k/keithgmi/" "/u/home/s/serghei/project/EC_survey/RepSeq_real/"
         sys.exit()
-
-    base_dir_join = os.path.join(str(raw_dir))
-    list_dir = os.listdir(base_dir_join)
-    files = [base_dir_join + file for file in list_dir]
+    print ("TRUE", true_dir)
+    print ("RAW", raw_dir)
+    # base_dir_join = os.path.join(raw_dir)
+    list_dir = os.listdir(raw_dir.strip('\r'))
+    print (list_dir)
+    files = [raw_dir.strip('\r') + "/" + file for file in list_dir]
     umis = handle_UMIs(files, true_dir)
 
 
