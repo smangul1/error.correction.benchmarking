@@ -11,4 +11,4 @@ RAW_DIR = "/u/home/s/serghei/project/EC_survey/RepSeq_real/"
 #
 
 # THIS IS FOR REAL
-python rep_seq_real_to_true.py "$TRUE_DIR" "$RAW_DIR"
+python rep_seq_real_to_true.py -output_dir "$TRUE_DIR" -input_dir "$RAW_DIR"
