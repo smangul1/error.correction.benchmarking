@@ -120,8 +120,10 @@ def handle_UMIs(files, true_dir):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Produce True from Rep. Seq Raw')
-    raw_dir = parser.add_argument('-input_dir', help = 'This is the directory to retrieve all rep seq raw data from.', required = True)
-    true_dir = parser.add_argument('-output_dir', help = 'This is the directory to create all true/and raw reads for testing tools.', required = True)
+    parser.add_argument('-input_dir', help = 'This is the directory to retrieve all rep seq raw data from.', required = True)
+    parser.add_argument('-output_dir', help = 'This is the directory to create all true/and raw reads for testing tools.', required = True)
+    raw_dir = parser['input_dir']
+    true_dir = parser['output_dir']
 
     print ("TRUE", true_dir)
     print ("RAW", raw_dir)
