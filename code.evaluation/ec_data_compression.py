@@ -12,36 +12,58 @@ import logging
 import sys
 import csv
 
-#What if these directories are running multiples processes at once?
+#NOTE: be sure to just make the following directories in the base_dir....
+        # read_data
+        # base_data
+        # baseline_data
+        # data_compression
+        # log
 
-def my_log(file_name, message):
-    with open( 'logging.txt', 'a') as logging_out:
-        logging = csv.writer(logging_out, delimiter='\t')
-        logging.writerow([file_name, message])
+
+def check_existence(base_dir_join, storage_folder, file_name):
+    if os.path.exists(base_dir_join + storage_folder + file_name + '.txt'):
+        return 'a'  # append if already exists
+    else:
+        return 'w'  # make a new file if not
+
+# FIX this function
+
+# def my_log(file_name, message):
+#     storage_folder = '/log/'
+#     type = check_existence(base_dir_join, storage_folder, file_name)
+#     with open(base_dir_join + storage_folder + file_name + '.txt', type) as logging_out:
+#         logging = csv.writer(logging_out, delimiter='\t')
+#         logging.writerow([file_name, message])
 
 
 def store_base_data(base_dir_join, file_name, read_name, length, base_counts):
-    with open(base_dir_join + '/base_data/' + file_name + '.txt', 'a') as baseout:
+    storage_folder = '/base_data/'
+    type = check_existence(base_dir_join, storage_folder, file_name)
+    with open(base_dir_join + storage_folder + file_name + '.txt', type) as baseout:
         baseout = csv.writer(baseout, delimiter='\t')
         baseout.writerow([read_name.description, length, base_counts['TP'], base_counts['FP'], base_counts['FN'], base_counts['TN'], base_counts['INDEL'], base_counts['TRIM']])
 
 
 def store_read_data(base_dir_join, file_name, read_name, read_classification):
-    with open(base_dir_join + '/read_data/' + file_name + '.txt', 'a') as readout:
+    storage_folder = '/read_data/'
+    type = check_existence(base_dir_join, storage_folder, file_name)
+    with open(base_dir_join + storage_folder + file_name + '.txt', type) as readout:
         readout = csv.writer(readout, delimiter='\t')
         readout.writerow([read_name.description, read_classification])
 
 
-
 def baseline(base_dir_join, file_name, read_name, length, base_counts):
-    with open( base_dir_join + '/baseline_data/' + file_name + '.txt', 'a') as baseline_out:
+    storage_folder = '/baseline_data/'
+    type = check_existence(base_dir_join, storage_folder, file_name)
+    with open( base_dir_join + storage_folder + file_name + '.txt', type) as baseline_out:
         baseline_out = csv.writer(baseline_out, delimiter='\t')
         baseline_out.writerow([read_name.description, length, base_counts['TP'], base_counts['FP']])
 
 
-
 def data_compression(base_dir_join, file_name, read_name, length, position_calls):
-    with open( base_dir_join + '/data_compression/' + file_name + '.txt', 'a') as data_comp_out:
+    storage_folder = '/data_compression/'
+    type = check_existence(base_dir_join, storage_folder, file_name)
+    with open( base_dir_join + storage_folder + file_name + '.txt', type) as data_comp_out:
         data_comp = csv.writer(data_comp_out, delimiter='\t')
         for key, value in sorted(position_calls.iteritems()):
             position = key

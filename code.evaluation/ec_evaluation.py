@@ -1,6 +1,6 @@
 #####################################################################################
 # Evaluation Code for Error Correction Benchmarking
-#   project zar-lab ucla
+#   zar-lab ucla
 #   4/20/18
 #   supervisor: Serghei Mangul
 #   author: Keith Mitchell
@@ -8,21 +8,15 @@
 #  Functions Contained: msa, analyze_bases, analyze_reads
 #####################################################################################
 
-# TODO:
-#    Proper logging
-#    Be sure tool, read ID, etc. (relevant info) is being passed to the function.
-
-
 from Bio import pairwise2, SeqIO
 from ec_data_compression import store_base_data, store_read_data, baseline, data_compression, my_log
 import os
-import logging
 import sys
 import csv
+import argparse
 
 
 def msa(true_sequence, raw_sequence, ec_sequence, description):
-
 
     alignments = pairwise2.align.globalms(true_sequence, raw_sequence, 5, -4, -10, -0.1)
 
@@ -36,17 +30,16 @@ def msa(true_sequence, raw_sequence, ec_sequence, description):
 
     #TODO: Log these?
     print description
-    print "True:", true_3.replace('-', '')
-    print "Raw: ", raw_3.replace('-', '')
-    print "EC:  ", ec_3.replace('-', '')
-
+    print "True:", true_3
+    print "Raw: ", raw_3
+    print "EC:  ", ec_3
 
     return true_3, raw_3, ec_3
 
 
 def analyze_bases(true_3, raw_3, ec_3):
 
-    """Keith Mitchell (keithgmitchell@g.ucla.edu).
+    """
             Function: Analyze true, raw(error_prone), and flawed/flawless error corrected reads
             Input 1: (string) true_sequence to be compared to raw and tool error corrected seq.
             Input 2: (string) raw_sequence (error prone sequence) that is to be compare to true and error corrected seq.
@@ -56,6 +49,7 @@ def analyze_bases(true_3, raw_3, ec_3):
                     EX:        stats_dict = {'TN':0, 'TP':0, 'FN':0, 'FP':0, 'INDEL':0, 'TRIM': 0}
     """
 
+    #TODO this function here
     # base level statistics now that there is an "MSA" that we can compare.
     stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FP': 0, 'INDEL': 0, 'TRIM': 0}
     position_calls = {}
@@ -116,135 +110,171 @@ def analyze_bases(true_3, raw_3, ec_3):
         return None
 
 
-
 def analyze_read(stats_dict, length):
 
-    """Keith Mitchell (keithgmitchell@g.ucla.edu).
-        Function: Analyze true, raw(error_prone), and flawed/flawless error corrected reads
-        Input 1: (string) true_sequence to be compared to raw and tool error corrected seq.
-        Input 2: (string) raw_sequence (error prone sequence) that is to be compare to true and error corrected seq.
-        Input 3: (string) ec_sequence (error corrected sequence) to be analyzed for flawed/flawless error correction
-        Returns:
-            Object 1: string - read level classification given the base counts passed to it for a given read:
-                EX:        ["TN", "FP(NORMAL)", "FP(INDEL)", "FP(TRIMMING), "TP", "TN"]
-
-    """
-
-    ##this portion decides what to classify the sequence as a whole as once the bases have been analyzed
     seq_classes = ["TN", "FP(NORMAL)", "FP(INDEL)", "FP(TRIMMING)", "TP", "FN"]
-    seq_ID = ""
 
     # If all bases are the TN then the read is a TN.
     if stats_dict['TN'] == length:
-        seq_ID = seq_classes[0]
+        return seq_classes[0]
 
     # If there are normal FP but no other FP(INDEL/trim) then the read is a normal FP.
     elif stats_dict['FP'] != 0 and stats_dict['INDEL'] == 0 and stats_dict['TRIM'] == 0:
-        seq_ID = seq_classes[1]
+        return seq_classes[1]
 
     # Next if there are FP from trimming then the read is as well.
     elif stats_dict['TRIM'] != 0:
-        seq_ID = seq_classes[3]
+        return seq_classes[3]
 
     # Next if there are FP from INDEL then the read is as well.
     elif stats_dict['INDEL'] != 0:
-        seq_ID = seq_classes[2]
+        return seq_classes[2]
 
     # If there are any TP bases and no FN bases then the read is a TP
     elif stats_dict['TP'] != 0 and stats_dict['FP'] == 0 and stats_dict['FN'] == 0:
-        seq_ID = seq_classes[4]
+        return seq_classes[4]
 
     # Otherwise the read is a FN
     else:
-        seq_ID = seq_classes[5]
+        return seq_classes[5]
 
-    return seq_ID
+
+def find_match_pe(fastq_1, fastq_2, true):
+    for rec_1, rec_2 in zip(fastq_1, fastq_2):
+        #TODO
+        check_1 = rec_1.description.split(' ')
+        check_2 = rec_2.description.split(' ')
+        if true == check_1[0]:
+            return rec_1
+        elif true == check_2[0]:
+            return rec_2
+
+    message = 'It seems that no match was found for the sequence (Paired End)'
+    #my_log(true, message)
+    return None
+
+
+def find_match_se(fastq, true):
+    for rec in fastq:
+        #TODO
+        check = rec.description.split(' ')
+        if true == check[0]:
+            return rec
+
+    message = 'It seems that no match was found for the sequence (Single End)'
+    #my_log(true, message)
+    return None
+
+
+def handle_files(true_check, true_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser):
+
+    if two_raw is True:
+        raw_rec = find_match_pe(fastq_raw1_parser, fastq_raw2_parser, true_check[0])
+    else:
+        raw_rec = find_match_se(fastq_raw1_parser, true_check[0])
+
+    if raw_rec is not None:
+        if two_ec is True:
+            ec_rec = find_match_pe(fastq_ec1_parser, fastq_ec2_parser, true_check[0])
+        else:
+            ec_rec = find_match_se(fastq_ec1_parser, true_check[0])
+
+        if ec_rec is not None:
+            alignment = msa(true_rec.seq, raw_rec.seq, ec_rec.seq, ec_rec.description)
+            base_counts = analyze_bases(alignment[0], alignment[1], alignment[2])
+
+            if base_counts is None:
+                message = "FAILURE: Base count == 'None'(improper MSA) [TRUE: %s], [RAW: %s], [EC: %s]" % (
+                true_rec.description, raw_rec.description, ec_rec.description)
+                print message
+                #my_log(base_dir_join, true_filename, message)
+
+            else:
+                position_calls = base_counts[2]
+                length = base_counts[1]
+                base_stats = base_counts[0]
+                print base_stats
+                read_class = analyze_read(base_stats, length)
+
+                # TODO fix this...
+                end_file_directory = ec1_filename.split('/')
+
+                base_dir_join = os.path.join(str(base_dir))
+                store_base_data(base_dir_join, end_file_directory[-1], ec_rec, length, base_stats)
+                store_read_data(base_dir_join, end_file_directory[-1], ec_rec, read_class)
+                baseline(base_dir_join, end_file_directory[-1], ec_rec, length, base_stats)
+                data_compression(base_dir_join, end_file_directory[-1], ec_rec, length, position_calls)
 
 
 if __name__ == "__main__":
 
-    try:
-        #Todo: make this for taking in strings.
-        base_dir = sys.argv[1]
-        true_filename = sys.argv[2]
-        raw1_filename = sys.argv[3]
-        raw2_filename = sys.argv[4]
-        ec1_filename = sys.argv[5]
-        ec2_filename = sys.argv[6]
-    except:
-        logging.warn('Example: python ec_evaluation.py "C:\Users\Amanda Beth Chron\Desktop\Testing Reads" "IGH_sim_rl_50_cov_1.true.fastq" "IGH_sim_rl_50_cov_1_R1.fastq" "IGH_sim_rl_50_cov_1_R2.fastq" "IGH_sim_rl_50_cov_1_R1.fastq.corrected" "IGH_sim_rl_50_cov_1_R2.fastq.corrected"')
-        sys.exit()
+    parser = argparse.ArgumentParser(description='Produces EC Evaluation for either paired-end or single-end sequences.\
+                                                 takes either 6, 5, or 4 arguments.( will adjust if needed)')
 
-    base_dir_join = os.path.join(str(base_dir))
-    fastq_ec1_parser = SeqIO.parse(base_dir_join + "/" + str(ec1_filename), 'fastq')
-    fastq_ec2_parser = SeqIO.parse(base_dir_join + "/" + str(ec2_filename), 'fastq')
-    fastq_raw1_parser = SeqIO.parse(base_dir_join + "/" + str(raw1_filename), 'fastq')
-    fastq_raw2_parser = SeqIO.parse(base_dir_join + "/" + str(raw2_filename), 'fastq')
-    fastq_true_parser = SeqIO.parse(base_dir_join + "/" + str(true_filename), 'fastq')
-
-    #TODO: clean this up depending on what is needed for the files to be inputted.
-    for true_rec in fastq_true_parser:
-        true_check = true_rec.description
-        fastq_raw1_parser = SeqIO.parse(base_dir_join + "/" + str(raw1_filename), 'fastq')
-        fastq_raw2_parser = SeqIO.parse(base_dir_join + "/" + str(raw2_filename), 'fastq')
-        for raw1_rec, raw2_rec in zip(fastq_raw1_parser, fastq_raw2_parser):
-            raw1_check = raw1_rec.description.split(' ')
-            raw2_check = raw2_rec.description.split(' ')
-            #print "1:    ", true_check, raw1_check[0], raw2_check[0]
-            raw_rec = None
-            if true_check == raw1_check[0]:
-                raw_rec = raw1_rec
-            elif true_check == raw2_check[0]:
-                raw_rec = raw2_rec
-
-            if raw_rec is not None:
-                fastq_ec1_parser = SeqIO.parse(base_dir_join + "/" + str(ec1_filename), 'fastq')
-                fastq_ec2_parser = SeqIO.parse(base_dir_join + "/" + str(ec2_filename), 'fastq')
-                for ec1_rec, ec2_rec in zip(fastq_ec1_parser, fastq_ec2_parser):
-                    ec1_check = ec1_rec.description[0:8]
-                    ec2_check = ec2_rec.description[0:8]
-                    #print "2:    ", true_check, ec1_check, ec2_check
-                    ec_rec = None
-                    if true_check == ec1_check:
-                        ec_rec = ec1_rec
-                    elif true_check == ec2_check:
-                        ec_rec = ec2_rec
-
-                    if ec_rec is not None:
-                        alignment = msa(true_rec.seq, raw_rec.seq, ec_rec.seq, ec_rec.description)
-                        base_counts = analyze_bases(alignment[0], alignment[1], alignment[2])
-
-                        if base_counts is None:
-                            message = "FAILURE: Base count == 'None'(improper MSA) [TRUE: %s], [RAW: %s], [EC: %s]" %(true_rec.description, raw_rec.description, ec_rec.description)
-                            my_log(true_filename, message)
-                            print ""
-                            print ""
-                        else:
-                            position_calls = base_counts[2]
-                            length = base_counts[1]
-                            base_stats = base_counts[0]
-                            read_class = analyze_read(base_stats, length)
-
-                            print base_stats
-                            print read_class
-                            print ""
+    parser.add_argument('-base_dir', help='This is the directory to produce the raw sequences to', required=True)
+    parser.add_argument('-true_1', help='This is the true file to be evaluated.', required=True)
+    parser.add_argument('-true_2', help='This is the true file to be evaluated.', required=False)
+    parser.add_argument('-raw_1', help='This is the raw file to be evaluated.', required=True)
+    parser.add_argument('-raw_2', help='This is the second raw file, if paired-end, to be evaluated.', required=False)
+    parser.add_argument('-ec_1', help='This is the ec file to be evaluated.', required=True)
+    parser.add_argument('-ec_2', help='This is the second ec file, if paired-end, to be evaluated.', required=False)
 
 
-                        break
-                break
+    args = vars(parser.parse_args())
+    base_dir = args['base_dir']
+    true1_filename = args['true_1']
+    true2_filename = args['true_2']
+    raw1_filename = args['raw_1']
+    raw2_filename = args['raw_2']
+    ec1_filename = args['ec_1']
+    ec2_filename = args['ec_2']
 
+    #TODO make this a dictionary so it is faster maybe combine files from the very beginning.
+    fastq_true1_parser = SeqIO.parse(os.path.join(str(true1_filename)), 'fastq')
 
-    # store_base_data(base_dir_join, ec_filename, ec_rec, length, base_stats)
-    # store_read_data(base_dir_join, ec_filename, ec_rec, read_class)
-    # baseline(base_dir_join, ec_filename, ec_rec, length, base_stats)
-    # data_compression(base_dir_join, ec_filename, ec_rec, length, position_calls)
+    two_ec = False
+    fastq_ec2_parser = ''
+    if ec2_filename is not None and ec2_filename != '':
+        fastq_ec2_parser = SeqIO.parse(os.path.join(str(ec2_filename)), 'fastq')
+        two_ec = True
+
+    two_raw = False
+    fastq_raw2_parser = ''
+    if raw2_filename is not None and raw2_filename != '':
+        fastq_raw2_parser = SeqIO.parse(os.path.join(str(raw2_filename)), 'fastq')
+        two_raw = True
+
+    two_true = False
+    if true2_filename is not None and true2_filename != '':
+        fastq_true2_parser = SeqIO.parse(os.path.join(str(true2_filename)), 'fastq')
+        two_true = True
+
+    if two_true == True:
+        for true1_rec, true2_rec in zip(fastq_true1_parser, fastq_true2_parser):
+            true_check1 = true1_rec.description.split(' ')
+            true_check2 = true2_rec.description.split(' ')
+
+            fastq_ec1_parser = SeqIO.parse(os.path.join(str(ec1_filename)), 'fastq')
+            fastq_raw1_parser = SeqIO.parse(os.path.join(str(raw1_filename)), 'fastq')
+            fastq_ec2_parser = SeqIO.parse(os.path.join(str(ec2_filename)), 'fastq')
+            fastq_raw2_parser = SeqIO.parse(os.path.join(str(raw2_filename)), 'fastq')
+
+            handle_files(true_check1, true1_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser)
+            handle_files(true_check2, true2_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser)
+    else:
+        for true_rec in fastq_true1_parser:
+            true_check = true_rec.description.split(' ')
+
+            fastq_ec1_parser = SeqIO.parse(os.path.join(str(ec1_filename)), 'fastq')
+            fastq_raw1_parser = SeqIO.parse(os.path.join(str(raw1_filename)), 'fastq')
+            fastq_ec2_parser = SeqIO.parse(os.path.join(str(ec2_filename)), 'fastq')
+            fastq_raw2_parser = SeqIO.parse(os.path.join(str(raw2_filename)), 'fastq')
+
+            handle_files(true_check, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser)
 
 
     message = "SUCCESS: %s, %s" % (ec1_filename, ec2_filename)
-    my_log(true_filename, message)
-
-        #log when the sum is not equal to the length aka something went wrong (try and except?)
-        #logging.warn('Input file name, ouput file name not provided')
+    #my_log(true1_filename, message)
 
 
 
