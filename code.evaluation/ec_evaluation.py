@@ -9,7 +9,7 @@
 #####################################################################################
 
 from Bio import pairwise2, SeqIO
-from ec_data_compression import store_base_data, store_read_data, baseline, data_compression, my_log
+from ec_data_compression import store_base_data, store_read_data, baseline, data_compression #, my_log
 import os
 import sys
 import csv
@@ -166,7 +166,7 @@ def find_match_se(fastq, true):
     return None
 
 
-def handle_files(true_check, true_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser):
+def handle_sequences(true_check, true_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser, base_dir):
 
     if two_raw is True:
         raw_rec = find_match_pe(fastq_raw1_parser, fastq_raw2_parser, true_check[0])
@@ -198,12 +198,13 @@ def handle_files(true_check, true_rec, two_ec, two_raw, fastq_raw1_parser, fastq
 
                 # TODO fix this...
                 end_file_directory = ec1_filename.split('/')
-
+                
+                cleaned_filename = end_file_directory[-1].strip(".fastq")
                 base_dir_join = os.path.join(str(base_dir))
-                store_base_data(base_dir_join, end_file_directory[-1], ec_rec, length, base_stats)
-                store_read_data(base_dir_join, end_file_directory[-1], ec_rec, read_class)
-                baseline(base_dir_join, end_file_directory[-1], ec_rec, length, base_stats)
-                data_compression(base_dir_join, end_file_directory[-1], ec_rec, length, position_calls)
+                store_base_data(base_dir_join, cleaned_filename, ec_rec, length, base_stats)
+                store_read_data(base_dir_join, cleaned_filename, ec_rec, read_class)
+                baseline(base_dir_join, cleaned_filename, ec_rec, length, base_stats)
+                data_compression(base_dir_join, cleaned_filename, ec_rec, length, position_calls)
 
 
 if __name__ == "__main__":
@@ -259,8 +260,8 @@ if __name__ == "__main__":
             fastq_ec2_parser = SeqIO.parse(os.path.join(str(ec2_filename)), 'fastq')
             fastq_raw2_parser = SeqIO.parse(os.path.join(str(raw2_filename)), 'fastq')
 
-            handle_files(true_check1, true1_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser)
-            handle_files(true_check2, true2_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser)
+            handle_sequences(true_check1, true1_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser, base_dir)
+            handle_sequences(true_check2, true2_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser, base_dir)
     else:
         for true_rec in fastq_true1_parser:
             true_check = true_rec.description.split(' ')
@@ -270,7 +271,7 @@ if __name__ == "__main__":
             fastq_ec2_parser = SeqIO.parse(os.path.join(str(ec2_filename)), 'fastq')
             fastq_raw2_parser = SeqIO.parse(os.path.join(str(raw2_filename)), 'fastq')
 
-            handle_files(true_check, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser)
+            handle_sequences(true_check, true_rec, two_ec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser, fastq_ec2_parser, base_dir)
 
 
     message = "SUCCESS: %s, %s" % (ec1_filename, ec2_filename)
