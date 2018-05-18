@@ -28,11 +28,12 @@ outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed"
 
 raw2filename=${raw2##*/}
 rawfilename=${raw##*/}
+wrappername=${wrapper##*/}
 
 ##########################################################################################
 # 1) Run tools rapper-> e.c. reads (some tools also ask to specify the genome length...)
 ##########################################################################################
-
+echo "PART 1: Run Tool Wrapper"
 
 # 1.A) then check if it is a tool that takes single end or paired end data
 # maybe add a check here to make sure the user did not pass true2 or raw2
@@ -46,7 +47,7 @@ fi
 echo "Single End Data Set?: $singleend"
 
 # 1.B) then check if it is a tool that takes the genome length
-# double check tools I need to finish here.. !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# double check tools I need to finish here.. !!!!!-------------------------------------------------
 #list that take glength [bfc, lighter]
 if [[ $wrapper == *"lighter"* ]] || [[ $wrapper == *"bfc"* ]]; then
 	type=1
@@ -66,17 +67,23 @@ echo "The tool is type: $type"
 # 1.C) check 1.A and 1.B to determine how to run the wrapper
 
 if [[ "$singleend" == true ]] && [[ $type == 1 ]]; then
-	echo $wrapper $raw $outdir $kmer $glength
+	echo "$wrapper $raw $outdir $kmer $glength"
+	$wrapper $raw $outdir $kmer $glength
 elif [[ "$singleend" == true ]] && [[ $type == 2 ]]; then
-	echo $wrapper $raw $outdir $glength
+	echo "$wrapper $raw $outdir $glength"
+	$wrapper $raw $outdir $glength
 elif [[ "$singleend" == true ]] && [[ $type == 3 ]]; then
-	echo $wrapper $raw $outdir $kmer
+	echo "$wrapper $raw $outdir $kmer"
+	$wrapper $raw $outdir $kmer
 elif [[ "$singleend" == false ]] && [[ $type == 1 ]]; then
-	echo $wrapper $raw $raw2 $outdir $kmer $glength;
+	echo "$wrapper $raw $raw2 $outdir $kmer $glength"
+	$wrapper $raw $raw2 $outdir $kmer $glength
 elif [[ "$singleend" == false ]] && [[ $type == 2 ]]; then
-	echo $wrapper $raw $raw2 $outdir $glength
+	echo "$wrapper $raw $raw2 $outdir $glength"
+	 $wrapper $raw $raw2 $outdir $glength
 elif [[ "$singleend" == false ]] && [[ $type == 3 ]]; then
-	echo $wrapper $raw $raw2 $outdir $kmer
+	echo "$wrapper $raw $raw2 $outdir $kmer"
+	$wrapper $raw $raw2 $outdir $kmer
 else
 	echo "Did not correspond with scenario.. "
 fi
@@ -84,7 +91,7 @@ fi
 
 # 1.D) retrieve the files from the directory
 
-# i think most tools produce one ec file for the paired end data... ???????????????????????????????????????????
+# i think all tools produce one ec file for the paired end data... ???------------------------------
 for filename in "$outdir";
 do
 	if [[ "$filename" == *"$rawfilename"* ]] || [[ "$filename" == *"$raw2filename"* ]]; then
@@ -95,6 +102,7 @@ done
 
 echo "Error corrected file found?: $ecfound"
 
+# TODO gunzip ec  is this always the case !!!!!!!!!!!!!!!!------------------------------------------
 
 #########################################################################################
 # 2) run ec evaluation to produce the compressed files and upload ec reads to gdrive
@@ -133,30 +141,34 @@ rm $ec
 ##########################################################################################
 echo "PART 4: produce summary from the compressed files"
 
-for filename in $outdircompressed 
+for filename in "$outdircompressed"; 
 do
-	if [ $filename = *"$rawfilename"*] || [ $filename = *"$raw2filename"*]; then
-		if [ $filename = *"base_data"*]; then
+	if [[ $filename == *"$rawfilename"* ]] || [[ $filename == *"$raw2filename"* ]]; then
+		if [[ $filename == *"base_data"* ]]; then
 			basefile="$outdircompressed/$filename"
 			echo "Successfully found basefile: $outdircompressed/$filename";
-		elif [ $filename = *"read_data"*]; then
+		elif [[ $filename == *"read_data"* ]]; then
 			readfile="$outdircompressed/$filename"
 			echo "Successfully found read file: $outdircompressed/$filename";
 		fi
 	fi
 done
 
+
+outsummary="/u/flashscratch/k/keithgmi/ec_summary"
 # run python script here to produce the summary.
-python compression_summary.py -kmer $kmer -wrapper $wrapper -read_data $readfile -base_data $basefile -ec_name $ec
+python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_summary.py -kmer $kmer -wrapper $wrapper -read_data $readfile -base_data $basefile -ec_name $ec -outdir $outsummary
 
 
 ##########################################################################################
 # 5) upload the compressed files to GDRIVE, update summary file
 ##########################################################################################
+echo "PART 5: upload compressed to gdrive and update summary file"
 
-# should we seperate based on the base_data data_compression etc?????????????????????????????????????????????????
+
+# should we seperate based on the base_data data_compression etc??? for now this is ok
 compressedgdrive=14ctrYlB5ldzwcYXG3MaoCmpqLK7SkIPZ
-for filename in $outdircompressed 
+for filename in "$outdircompressed"; 
 do
 	gdrive upload --parent $compressedgdrive $filenmae
 done
