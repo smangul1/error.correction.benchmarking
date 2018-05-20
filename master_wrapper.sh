@@ -1,4 +1,8 @@
+
 AUTHOR="keithgmi"
+
+# master list of hashes to upload the master directory 
+
 
 
 #########################################################################
@@ -18,96 +22,143 @@ true=$1
 raw=$2
 wrapper=$3 
 kmer=$4
-glength=$5
-true2=$6
-raw2=$7
+kmer2=$5
+glength=$6
+rlen=$7
+true2=$8
+raw2=$9
+gdirvehash=$10
+
+## Testing Parameters
+# true="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_true_sim_rl_100_cov_1_1.fastq"
+# raw="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_sim_rl_100_cov_1_1.fastq"
+# wrapper="/u/home/k/keithgmi/project-zarlab/ec2/wrappers/paired_end/run.musket.sh"
+# kmer=18
+# kmer2=300000
+# glength=3000
+# rlen=100
+# true2="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_true_sim_rl_100_cov_1_2.fastq"
+# raw2="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_sim_rl_100_cov_1_2.fastq"
+# gdrivehash=1hAfrtIAB_02JJaBfF6JwzIPxwqen18HM
 
 #these will act as the temp. directories
-outdir="/u/flashscratch/k/keithgmi/master_wrapper_ec"
-outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed"
+outdir="/u/flashscratch/k/keithgmi/master_wrapper_ec/"
+outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed/"
+outsummary="/u/flashscratch/k/keithgmi/ec_summary/"
 
 raw2filename=${raw2##*/}
 rawfilename=${raw##*/}
 wrappername=${wrapper##*/}
+raw2cleaned=${raw2filename%.fastq}
+rawcleaned=${rawfilename%.fastq}
 
-##########################################################################################
-# 1) Run tools rapper-> e.c. reads (some tools also ask to specify the genome length...)
-##########################################################################################
+echo "Raw2 Name: $raw2cleaned"
+echo "Raw Name: $rawcleaned"
+echo "Wrapper Name: $wrappername"
+
+
+echo "----------------------------------------------------------------------------------"
 echo "PART 1: Run Tool Wrapper"
+echo "----------------------------------------------------------------------------------"
 
-# 1.A) then check if it is a tool that takes single end or paired end data
-# maybe add a check here to make sure the user did not pass true2 or raw2
+# 1.A) find the proper settings to run the wrapper with 
 
-if [[ $wrapper == *".se."* ]]; then
-	singleend=true
-else
-	singleend=false
+if [[ $wrapper != *".se."* ]]; then
+	if [[ $wrapper == *"bfc"* ]]; then
+		# run bfc
+		tool=bfc
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer $glength
+
+	elif [[ $wrapper == *"bless"* ]]; then
+		# run bless
+		tool=bless
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer
+
+	elif [[ $wrapper == *"coral"* ]]; then
+		# run coral
+		tool=coral
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer
+
+	elif [[ $wrapper == *"fiona"* ]]; then
+		# run fiona
+		tool=fiona
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $glength
+
+	elif [[ $wrapper == *"lighter"* ]]; then
+		# run lighter
+		tool=lighter
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer $kmer2
+
+	elif [[ $wrapper == *"musket"* ]]; then	
+		# run musket
+		tool=musket
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer $kmer2
+
+	elif [[ $wrapper == *"pollux"* ]]; then	
+		# run pollux
+		tool=pollux
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer
+
+	elif [[ $wrapper == *"racer"* ]]; then
+		# run racer
+		tool=racer
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $glength
+
+	elif [[ $wrapper == *"reckoner"* ]]; then
+		# run reckoner
+		tool=reckoner
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer $glength
+
+	elif [[ $wrapper == *"sga"* ]]; then
+		# run sga
+		tool=sga
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer
+
+	elif [[ $wrapper == *"soapec"* ]]; then
+		# run soapec
+		tool=soapec
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir $kmer $rlen
+	fi
 fi
 
-echo "Single End Data Set?: $singleend"
 
-# 1.B) then check if it is a tool that takes the genome length
-# double check tools I need to finish here.. !!!!!-------------------------------------------------
-#list that take glength [bfc, lighter]
-if [[ $wrapper == *"lighter"* ]] || [[ $wrapper == *"bfc"* ]]; then
-	type=1
-
-#list that takes glength but not kmer [fiona, racer ]
-elif [[ $wrapper == *"fiona"* ]] || [[ $wrapper == *"racer"* ]]; then
-	type=2
-
-#by default the rest take kmer but not glength
-else
-	type=3
-fi
-
-echo "The tool is type: $type"
-
-
-# 1.C) check 1.A and 1.B to determine how to run the wrapper
-
-if [[ "$singleend" == true ]] && [[ $type == 1 ]]; then
-	echo "$wrapper $raw $outdir $kmer $glength"
-	$wrapper $raw $outdir $kmer $glength
-elif [[ "$singleend" == true ]] && [[ $type == 2 ]]; then
-	echo "$wrapper $raw $outdir $glength"
-	$wrapper $raw $outdir $glength
-elif [[ "$singleend" == true ]] && [[ $type == 3 ]]; then
-	echo "$wrapper $raw $outdir $kmer"
-	$wrapper $raw $outdir $kmer
-elif [[ "$singleend" == false ]] && [[ $type == 1 ]]; then
-	echo "$wrapper $raw $raw2 $outdir $kmer $glength"
-	$wrapper $raw $raw2 $outdir $kmer $glength
-elif [[ "$singleend" == false ]] && [[ $type == 2 ]]; then
-	echo "$wrapper $raw $raw2 $outdir $glength"
-	 $wrapper $raw $raw2 $outdir $glength
-elif [[ "$singleend" == false ]] && [[ $type == 3 ]]; then
-	echo "$wrapper $raw $raw2 $outdir $kmer"
-	$wrapper $raw $raw2 $outdir $kmer
-else
-	echo "Did not correspond with scenario.. "
-fi
-
-
-# 1.D) retrieve the files from the directory
-
-# i think all tools produce one ec file for the paired end data... ???------------------------------
-for filename in "$outdir";
+# 1.B) retrieve the proper ec file from the directory and the log... what to do with the log file????????????????????????????????????????
+for filename in $outdir*;
 do
-	if [[ "$filename" == *"$rawfilename"* ]] || [[ "$filename" == *"$raw2filename"* ]]; then
-		ecfound=true
-		ec=$outdir$filename
+	if [[ "$filename" == *"$rawcleaned"* ]] || [[ "$filename" == *"$raw2cleaned"* ]]; then
+		if [[ "$filename" != *".log"* ]] && [[ "$filename" == *"$tool"* ]]; then
+			ecfound=true
+			echo "Found the EC $filename in $outdir"
+			ec=$filename
+		elif [[ "$filename" == *".log"* ]] && [[ "$filename" == *"$tool"* ]]; then
+			echo "Found the EC LOG $filename in $outdir"
+			eclog=$filename
+		fi
 	fi
 done
 
 echo "Error corrected file found?: $ecfound"
 
-# TODO gunzip ec  is this always the case !!!!!!!!!!!!!!!!------------------------------------------
+# 1.C) unzip the ec file produced
+gunzip $ec
 
-#########################################################################################
-# 2) run ec evaluation to produce the compressed files and upload ec reads to gdrive
-#########################################################################################
+unzippedec=${ec%.gz}
+
+echo "----------------------------------------------------------------------------------"
 echo "PART 2: Run EC Evaluation"
+echo "----------------------------------------------------------------------------------"
+
 
 . /u/local/Modules/default/init/modules.sh
 module load python
@@ -115,71 +166,69 @@ module load python
 # for single end
 if [[ $wrapper == *".se."* ]]; then
 	echo "Beginning evaluation for a single end set."
-	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -raw_1 "$raw" -ec_1 "$ec"
+	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -raw_1 "$raw" -ec_1 "$unzippedec"
 	echo "Finished evaluation for a single end set."
 
 # for paired end
 else
 	echo "Beginning evaluation for a paired end set."
-	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -true_2 "$true2" -raw_1 "$raw" -raw_2 "$raw2" -ec_1 "$ec"
+	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -true_2 "$true2" -raw_1 "$raw" -raw_2 "$raw2" -ec_1 "$unzippedec"
 	echo "Finished evaluation for a paired end set."
 fi
 
-# should we specify something 
-ecgdrive=1PWqI5IqUfCtKog4HodJYIqusjZtLAzSY
-gdrive upload --parent $ecgdrive $ec
 
-#########################################################################################
-# 3) get rid of the ec reads from STEP 1 on the cluster (upload to gdrive first???)
-#########################################################################################
+## NOT planning on uploading the EC files
+# # should we specify something 
+# ecgdrive=1PWqI5IqUfCtKog4HodJYIqusjZtLAzSY
+# echo "Uploading the file $newec to google drive."
+# /u/home/k/keithgmi/code/./gdrive-linux-x64 upload --parent $ecgdrive $newec
+
+
+
+echo "----------------------------------------------------------------------------------"
 echo "PART 3: Remove the EC reads produced in PART 1."
+echo "----------------------------------------------------------------------------------"
 
-rm $ec
+rm $unzippedec
+rm $eclog
+echo "Removed: $unzippedec, $eclog"
 
-##########################################################################################
-# 4) produces a summary from the compressed files for the relevant reads
-##########################################################################################
-echo "PART 4: produce summary from the compressed files"
 
-for filename in "$outdircompressed"; 
+echo "----------------------------------------------------------------------------------"
+echo "PART 4: produce summary after finding the proper files"
+echo "----------------------------------------------------------------------------------"
+
+
+for filename in $outdircompressed*; 
 do
-	if [[ $filename == *"$rawfilename"* ]] || [[ $filename == *"$raw2filename"* ]]; then
-		if [[ $filename == *"base_data"* ]]; then
-			basefile="$outdircompressed/$filename"
-			echo "Successfully found basefile: $outdircompressed/$filename";
-		elif [[ $filename == *"read_data"* ]]; then
-			readfile="$outdircompressed/$filename"
-			echo "Successfully found read file: $outdircompressed/$filename";
+	if [[ $filename == *"$rawcleaned"* ]] || [[ $filename == *"$raw2cleaned"* ]]; then
+		if [[ $filename == *"base_data"* ]] && [[ $filename == *"$tool"* ]]; then
+			basefile=$filename
+			echo "Successfully found basefile: $outdircompressed$filename";
+		elif [[ $filename == *"read_data"* ]] && [[ $filename == *"$tool"* ]]; then
+			readfile=$filename
+			echo "Successfully found read file: $outdircompressed$filename";
 		fi
 	fi
+	# upload to gdrive in the directory for the relative tool then remove
+	
 done
 
-
-outsummary="/u/flashscratch/k/keithgmi/ec_summary"
 # run python script here to produce the summary.
 python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_summary.py -kmer $kmer -wrapper $wrapper -read_data $readfile -base_data $basefile -ec_name $ec -outdir $outsummary
 
 
-##########################################################################################
-# 5) upload the compressed files to GDRIVE, update summary file
-##########################################################################################
-echo "PART 5: upload compressed to gdrive and update summary file"
 
+echo "----------------------------------------------------------------------------------"
+echo "PART 5: upload compressed files, then remove compressed files"
+echo "----------------------------------------------------------------------------------"
 
-# should we seperate based on the base_data data_compression etc??? for now this is ok
-compressedgdrive=14ctrYlB5ldzwcYXG3MaoCmpqLK7SkIPZ
-for filename in "$outdircompressed"; 
+for filename in $outdircompressed*;
 do
-	gdrive upload --parent $compressedgdrive $filenmae
-done
-
-# i changed this just to update the summary file on flashscratch since we have to actively make changes to it.
-# this will be the data for analysis of all tools and will only append one row for each of the tools ran..
-
-
-
-##########################################################################################
-# 6) get rid of the compressed and summary files from the cluster
-##########################################################################################
-
-rm $outdircompressed/*
+	if [[ $filename == *"$rawcleaned"* ]] || [[ $filename == *"$raw2cleaned"* ]]; then
+		if [[ $filename == *"$tool"* ]]; then
+			/u/home/k/keithgmi/code/./gdrive-linux-x64 upload --parent $gdrivehash $filename
+			rm $filename
+		fi
+	fi
+done	
