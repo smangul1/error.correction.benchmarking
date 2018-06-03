@@ -19,21 +19,20 @@ def check_existence(base_dir_join, storage_type, file_name):
     else:
         return 'w'  # make a new file if not
 
-# FIX this function??
-# def my_log(file_name, message):
-#     storage_folder = '/log/'
-#     type = check_existence(base_dir_join, storage_folder, file_name)
-#     with open(base_dir_join + storage_folder + file_name + '.txt', type) as logging_out:
-#         logging = csv.writer(logging_out, delimiter='\t')
-#         logging.writerow([file_name, message])
-
+def my_log(base_dir_join, file_name, message):
+    storage_ext = '_log'
+    type = check_existence(base_dir_join, storage_ext, file_name)
+    with open(base_dir_join + file_name + storage_ext + '.txt', type) as logout:
+        print message
+        logout.write(str(message) + "\n")
 
 def store_base_data(base_dir_join, file_name, read_name, length, base_counts):
+    # stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, 'FP TRIM': 0, 'TP TRIM': 0}
     storage_ext = '_base_data'
     type = check_existence(base_dir_join, storage_ext, file_name)
     with open(base_dir_join + file_name + storage_ext + '.txt', type) as baseout:
         baseout = csv.writer(baseout, delimiter=',')
-        baseout.writerow([read_name.description, length, base_counts['TP'], base_counts['FP'], base_counts['FN'], base_counts['INDEL'], base_counts['TRIM']])
+        baseout.writerow([read_name, length, base_counts['TP'], base_counts['FN'], base_counts['FN WRONG'], base_counts['FP'], base_counts['FP INDEL'], base_counts['FP TRIM'], base_counts['TP TRIM']])
 
 
 def store_read_data(base_dir_join, file_name, read_name, read_classification):
@@ -42,15 +41,16 @@ def store_read_data(base_dir_join, file_name, read_name, read_classification):
     with open(base_dir_join + file_name + storage_ext + '.txt', type) as readout:
         readout = csv.writer(readout, delimiter=',')
         if read_classification != "TN":
-            readout.writerow([read_name.description, read_classification])
+            readout.writerow([read_name, read_classification])
 
 
 def baseline(base_dir_join, file_name, read_name, length, base_counts):
+    # stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, 'FP TRIM': 0, 'TP TRIM': 0}
     storage_ext = '_baseline_data'
     type = check_existence(base_dir_join, storage_ext, file_name)
     with open(base_dir_join + file_name + storage_ext + '.txt', type) as baseline_out:
         baseline_out = csv.writer(baseline_out, delimiter=',')
-        baseline_out.writerow([read_name.description, length, base_counts['TP'], base_counts['FP']])
+        baseline_out.writerow([read_name, length, base_counts['TP'], base_counts['FP'], base_counts['FP INDEL']])
 
 
 def data_compression(base_dir_join, file_name, read_name, length, position_calls):
@@ -61,7 +61,7 @@ def data_compression(base_dir_join, file_name, read_name, length, position_calls
         for key, value in sorted(position_calls.iteritems()):
             position = key
             call, true_bp, raw_bp, ec_bp = value[0], value[1], value[2], value[3]
-            data_comp.writerow([read_name.description, length, position, call, true_bp, raw_bp, ec_bp])
+            data_comp.writerow([read_name, length, position, call, true_bp, raw_bp, ec_bp])
 
 
 

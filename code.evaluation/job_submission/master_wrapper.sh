@@ -1,3 +1,5 @@
+#!/bin/bash
+
 
 AUTHOR="keithgmi"
 
@@ -14,8 +16,7 @@ AUTHOR="keithgmi"
 # 2) run ec evaluation to produce the compressed files and upload EC reads
 # 3) get rid of the ec reads from STEP 1 on the cluster
 # 4) produces a summary from the compressed files for the relevant reads
-# 5) upload the compressed files and summary files to GDRIVE
-# 6) get rid of the compressed and summary files from the cluster
+# 5) upload, then remove, the compressed files to GDRIVE
 
 
 true=$1
@@ -27,24 +28,31 @@ glength=$6
 rlen=$7
 true2=$8
 raw2=$9
-gdirvehash=$10
+gdrivehash="${10}"
 
-## Testing Parameters
+
+# #Testing Parameters
 # true="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_true_sim_rl_100_cov_1_1.fastq"
 # raw="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_sim_rl_100_cov_1_1.fastq"
-# wrapper="/u/home/k/keithgmi/project-zarlab/ec2/wrappers/paired_end/run.musket.sh"
+# wrapper="/u/home/k/keithgmi/project-zarlab/ec2/wrappers/paired_end/run.coral.sh"
 # kmer=18
 # kmer2=300000
 # glength=3000
 # rlen=100
 # true2="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_true_sim_rl_100_cov_1_2.fastq"
 # raw2="/u/flashscratch/k/keithgmi/testing_repseq_sim/rep.seq_test_sim_rl_100_cov_1_2.fastq"
-# gdrivehash=1hAfrtIAB_02JJaBfF6JwzIPxwqen18HM
+# # gdrivehash=1hAfrtIAB_02JJaBfF6JwzIPxwqen18HM
+# gdrivehash=0
+
 
 #these will act as the temp. directories
-outdir="/u/flashscratch/k/keithgmi/master_wrapper_ec/"
-outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed/"
+################### HOST SPECIFIC ################################
+
 outsummary="/u/flashscratch/k/keithgmi/ec_summary/"
+outdir="/u/flashscratch/k/keithgmi/master_wrapper_ec/"
+
+################### HOST SPECIFIC ################################
+
 
 raw2filename=${raw2##*/}
 rawfilename=${raw##*/}
@@ -68,70 +76,85 @@ if [[ $wrapper != *".se."* ]]; then
 		# run bfc
 		tool=bfc
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer $glength
+		$wrapper $raw $raw2 $outdir$tool/ $kmer $glength
 
 	elif [[ $wrapper == *"bless"* ]]; then
 		# run bless
 		tool=bless
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer
+		$wrapper $raw $raw2 $outdir$tool/ $kmer
 
 	elif [[ $wrapper == *"coral"* ]]; then
 		# run coral
 		tool=coral
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer
+		$wrapper $raw $raw2 $outdir$tool/ $kmer
 
 	elif [[ $wrapper == *"fiona"* ]]; then
 		# run fiona
 		tool=fiona
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $glength
+		$wrapper $raw $raw2 $outdir$tool/ $glength
 
 	elif [[ $wrapper == *"lighter"* ]]; then
 		# run lighter
 		tool=lighter
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer $kmer2
+		$wrapper $raw $raw2 $outdir$tool/ $kmer $kmer2
 
 	elif [[ $wrapper == *"musket"* ]]; then	
 		# run musket
 		tool=musket
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer $kmer2
+		$wrapper $raw $raw2 $outdir$tool/ $kmer $kmer2
 
 	elif [[ $wrapper == *"pollux"* ]]; then	
 		# run pollux
 		tool=pollux
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer
+		$wrapper $raw $raw2 $outdir$tool/ $kmer
 
 	elif [[ $wrapper == *"racer"* ]]; then
 		# run racer
 		tool=racer
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $glength
+		$wrapper $raw $raw2 $outdir$tool/ $glength
 
 	elif [[ $wrapper == *"reckoner"* ]]; then
 		# run reckoner
 		tool=reckoner
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer $glength
+		$wrapper $raw $raw2 $outdir$tool/ $kmer $glength
 
 	elif [[ $wrapper == *"sga"* ]]; then
 		# run sga
 		tool=sga
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer
+		$wrapper $raw $raw2 $outdir$tool/ $kmer
+
+	elif [[ $wrapper == *"rcorrector"* ]]; then
+		# run sga
+		tool=rcorrector
+		echo "Running $tool for Paired End Data"
+		$wrapper $raw $raw2 $outdir$tool/ $kmer
 
 	elif [[ $wrapper == *"soapec"* ]]; then
 		# run soapec
 		tool=soapec
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir $kmer $rlen
+		$wrapper $raw $raw2 $outdir$tool/ $kmer $rlen
 	fi
 fi
 
+
+################### HOST SPECIFIC ################################
+#acts as temp directories (builds off of the first host specific variables
+# be sure to have a directory for each tool
+
+outdir=$outdir$tool/
+outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed/$tool/"
+
+################### HOST SPECIFIC ################################
 
 # 1.B) retrieve the proper ec file from the directory and the log... what to do with the log file????????????????????????????????????????
 for filename in $outdir*;
@@ -155,6 +178,8 @@ gunzip $ec
 
 unzippedec=${ec%.gz}
 
+head -10 $unzippedec
+
 echo "----------------------------------------------------------------------------------"
 echo "PART 2: Run EC Evaluation"
 echo "----------------------------------------------------------------------------------"
@@ -166,13 +191,21 @@ module load python
 # for single end
 if [[ $wrapper == *".se."* ]]; then
 	echo "Beginning evaluation for a single end set."
+
+	################### HOST SPECIFIC ################################
 	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -raw_1 "$raw" -ec_1 "$unzippedec"
+	################### HOST SPECIFIC ################################
+
 	echo "Finished evaluation for a single end set."
 
 # for paired end
 else
 	echo "Beginning evaluation for a paired end set."
+
+	################### HOST SPECIFIC ################################
 	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -true_2 "$true2" -raw_1 "$raw" -raw_2 "$raw2" -ec_1 "$unzippedec"
+	################### HOST SPECIFIC ################################
+
 	echo "Finished evaluation for a paired end set."
 fi
 
@@ -204,10 +237,10 @@ do
 	if [[ $filename == *"$rawcleaned"* ]] || [[ $filename == *"$raw2cleaned"* ]]; then
 		if [[ $filename == *"base_data"* ]] && [[ $filename == *"$tool"* ]]; then
 			basefile=$filename
-			echo "Successfully found basefile: $outdircompressed$filename";
+			echo "Successfully found basefile: $filename";
 		elif [[ $filename == *"read_data"* ]] && [[ $filename == *"$tool"* ]]; then
 			readfile=$filename
-			echo "Successfully found read file: $outdircompressed$filename";
+			echo "Successfully found read file: $filename";
 		fi
 	fi
 	# upload to gdrive in the directory for the relative tool then remove
@@ -215,7 +248,10 @@ do
 done
 
 # run python script here to produce the summary.
+
+################### HOST SPECIFIC ################################
 python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_summary.py -kmer $kmer -wrapper $wrapper -read_data $readfile -base_data $basefile -ec_name $ec -outdir $outsummary
+################### HOST SPECIFIC ################################
 
 
 
@@ -227,7 +263,12 @@ for filename in $outdircompressed*;
 do
 	if [[ $filename == *"$rawcleaned"* ]] || [[ $filename == *"$raw2cleaned"* ]]; then
 		if [[ $filename == *"$tool"* ]]; then
+
+			################### HOST SPECIFIC ################################
 			/u/home/k/keithgmi/code/./gdrive-linux-x64 upload --parent $gdrivehash $filename
+			################### HOST SPECIFIC ################################
+
+			echo "Uploading the file $filename to parent $gdrivehash"
 			rm $filename
 		fi
 	fi
