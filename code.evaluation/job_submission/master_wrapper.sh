@@ -71,78 +71,92 @@ echo "--------------------------------------------------------------------------
 
 # 1.A) find the proper settings to run the wrapper with 
 
+key=$RANDOM
+
 if [[ $wrapper != *".se."* ]]; then
 	if [[ $wrapper == *"bfc"* ]]; then
 		# run bfc
 		tool=bfc
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer $glength
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer $glength
 
 	elif [[ $wrapper == *"bless"* ]]; then
 		# run bless
 		tool=bless
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer
 
 	elif [[ $wrapper == *"coral"* ]]; then
 		# run coral
 		tool=coral
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer
 
 	elif [[ $wrapper == *"fiona"* ]]; then
 		# run fiona
 		tool=fiona
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $glength
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $glength
 
 	elif [[ $wrapper == *"lighter"* ]]; then
 		# run lighter
 		tool=lighter
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer $kmer2
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer $kmer2
 
 	elif [[ $wrapper == *"musket"* ]]; then	
 		# run musket
 		tool=musket
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer $kmer2
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer $kmer2
 
 	elif [[ $wrapper == *"pollux"* ]]; then	
 		# run pollux
 		tool=pollux
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer
 
 	elif [[ $wrapper == *"racer"* ]]; then
 		# run racer
 		tool=racer
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $glength
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $glength
 
 	elif [[ $wrapper == *"reckoner"* ]]; then
 		# run reckoner
 		tool=reckoner
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer $glength
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer $glength
 
 	elif [[ $wrapper == *"sga"* ]]; then
 		# run sga
 		tool=sga
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer
 
 	elif [[ $wrapper == *"rcorrector"* ]]; then
 		# run sga
 		tool=rcorrector
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer
 
 	elif [[ $wrapper == *"soapec"* ]]; then
 		# run soapec
 		tool=soapec
 		echo "Running $tool for Paired End Data"
-		$wrapper $raw $raw2 $outdir$tool/ $kmer $rlen
+		mkdir $outdir$tool/$key/
+		$wrapper $raw $raw2 $outdir$tool/$key/ $kmer $rlen
 	fi
 fi
 
@@ -151,9 +165,9 @@ fi
 #acts as temp directories (builds off of the first host specific variables
 # be sure to have a directory for each tool
 
-outdir=$outdir$tool/
-outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed/$tool/"
-
+outdir="$outdir$tool/$key/"
+outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed/$tool/$key/"
+mkdir $outdircompressed
 ################### HOST SPECIFIC ################################
 
 # 1.B) retrieve the proper ec file from the directory and the log... what to do with the log file????????????????????????????????????????
@@ -178,9 +192,7 @@ gunzip $ec
 
 unzippedec=${ec%.gz}
 
-$unzippedlimit=${unzippedec%.fastq}_limit.fastq
-
-head -800000 $unzippedec > $unzippedlimit
+head -10 $unzippedec
 
 echo "----------------------------------------------------------------------------------"
 echo "PART 2: Run EC Evaluation"
@@ -195,7 +207,7 @@ if [[ $wrapper == *".se."* ]]; then
 	echo "Beginning evaluation for a single end set."
 
 	################### HOST SPECIFIC ################################
-	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -raw_1 "$raw" -ec_1 "$unzippedlimit"
+	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -raw_1 "$raw" -ec_1 "$unzippedec"
 	################### HOST SPECIFIC ################################
 
 	echo "Finished evaluation for a single end set."
@@ -205,7 +217,7 @@ else
 	echo "Beginning evaluation for a paired end set."
 
 	################### HOST SPECIFIC ################################
-	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -true_2 "$true2" -raw_1 "$raw" -raw_2 "$raw2" -ec_1 "$unzippedlimit"
+	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -true_2 "$true2" -raw_1 "$raw" -raw_2 "$raw2" -ec_1 "$unzippedec"
 	################### HOST SPECIFIC ################################
 
 	echo "Finished evaluation for a paired end set."
@@ -225,9 +237,8 @@ echo "PART 3: Remove the EC reads produced in PART 1."
 echo "----------------------------------------------------------------------------------"
 
 rm $unzippedec
-rm $unzippedlimit
 rm $eclog
-echo "Removed: $unzippedec, $unzippedlimit, $eclog"
+echo "Removed: $unzippedec, $eclog"
 
 
 echo "----------------------------------------------------------------------------------"
@@ -276,3 +287,6 @@ do
 		fi
 	fi
 done	
+
+rm -R $outdir
+rm -R $outdircompressed
