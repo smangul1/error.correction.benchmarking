@@ -178,7 +178,9 @@ gunzip $ec
 
 unzippedec=${ec%.gz}
 
-head -10 $unzippedec
+$unzippedlimit=${unzippedec%.fastq}_limit.fastq
+
+head -800000 $unzippedec > $unzippedlimit
 
 echo "----------------------------------------------------------------------------------"
 echo "PART 2: Run EC Evaluation"
@@ -193,7 +195,7 @@ if [[ $wrapper == *".se."* ]]; then
 	echo "Beginning evaluation for a single end set."
 
 	################### HOST SPECIFIC ################################
-	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -raw_1 "$raw" -ec_1 "$unzippedec"
+	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -raw_1 "$raw" -ec_1 "$unzippedlimit"
 	################### HOST SPECIFIC ################################
 
 	echo "Finished evaluation for a single end set."
@@ -203,7 +205,7 @@ else
 	echo "Beginning evaluation for a paired end set."
 
 	################### HOST SPECIFIC ################################
-	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -true_2 "$true2" -raw_1 "$raw" -raw_2 "$raw2" -ec_1 "$unzippedec"
+	python /u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/code.evaluation/ec_evaluation.py -base_dir "$outdircompressed" -true_1 "$true" -true_2 "$true2" -raw_1 "$raw" -raw_2 "$raw2" -ec_1 "$unzippedlimit"
 	################### HOST SPECIFIC ################################
 
 	echo "Finished evaluation for a paired end set."
@@ -223,8 +225,9 @@ echo "PART 3: Remove the EC reads produced in PART 1."
 echo "----------------------------------------------------------------------------------"
 
 rm $unzippedec
+rm $unzippedlimit
 rm $eclog
-echo "Removed: $unzippedec, $eclog"
+echo "Removed: $unzippedec, $unzippedlimit, $eclog"
 
 
 echo "----------------------------------------------------------------------------------"

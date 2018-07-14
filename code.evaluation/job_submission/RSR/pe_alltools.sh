@@ -23,9 +23,8 @@ MASTERWRAPPER="/u/home/k/keithgmi/project-zarlab/error.correction.benchmarking/.
 
 ################### HOST SPECIFIC ################################
 
-LENGTH=$1
 TARRAY=$2
-TSET=$3
+TSET=$1
 
 ################### DATASET SPECIFIC ################################
 KMER=18                   # kmer length
@@ -37,184 +36,247 @@ RLEN=$LENGTH              # maximum read length
 
 #KMER 18
 if [ $TARRAY -eq 1 ]; then
-	COV=1
+	SRA=SRR1543963
 	KMER=18
 elif [ $TARRAY -eq 2 ]; then
-	COV=2
+	SRA=SRR1543964
 	KMER=18
 elif [ $TARRAY -eq 3 ]; then
-	COV=4
+	SRA=SRR1543965
 	KMER=18
 elif [ $TARRAY -eq 4 ]; then
-	COV=8
+	SRA=SRR1543966
 	KMER=18
 elif [ $TARRAY -eq 5 ]; then
-	COV=16
+	SRA=SRR1543967
 	KMER=18
 elif [ $TARRAY -eq 6 ]; then
-	COV=32
+	SRA=SRR1543968
 	KMER=18
 elif [ $TARRAY -eq 7 ]; then
-	COV=64
+	SRA=SRR1543969
 	KMER=18
 elif [ $TARRAY -eq 8 ]; then
-	COV=128
+	SRA=SRR1543970
+	KMER=18
+elif [ $TARRAY -eq 9 ]; then
+	SRA=SRR1543971
+	KMER=18
+elif [ $TARRAY -eq 10 ]; then
+	SRA=SRR1543972
+	KMER=18
+elif [ $TARRAY -eq 11 ]; then
+	SRA=SRR1543973
 	KMER=18
 
 #KMER 19
-elif [ $TARRAY -eq 9 ]; then
-	COV=1
-	KMER=19
-elif [ $TARRAY -eq 10 ]; then
-	COV=2
-	KMER=19
-elif [ $TARRAY -eq 11 ]; then
-	COV=4
-	KMER=19
 elif [ $TARRAY -eq 12 ]; then
-	COV=8
+	SRA=SRR1543963
 	KMER=19
 elif [ $TARRAY -eq 13 ]; then
-	COV=16
+	SRA=SRR1543964
 	KMER=19
 elif [ $TARRAY -eq 14 ]; then
-	COV=32
+	SRA=SRR1543965
 	KMER=19
 elif [ $TARRAY -eq 15 ]; then
-	COV=64
+	SRA=SRR1543966
 	KMER=19
 elif [ $TARRAY -eq 16 ]; then
-	COV=128
+	SRA=SRR1543967
+	KMER=19
+elif [ $TARRAY -eq 17 ]; then
+	SRA=SRR1543968
+	KMER=19
+elif [ $TARRAY -eq 18 ]; then
+	SRA=SRR1543969
+	KMER=19
+elif [ $TARRAY -eq 19 ]; then
+	SRA=SRR1543970
+	KMER=19
+elif [ $TARRAY -eq 20 ]; then
+	SRA=SRR1543971
+	KMER=19
+elif [ $TARRAY -eq 21 ]; then
+	SRA=SRR1543972
+	KMER=19
+elif [ $TARRAY -eq 22 ]; then
+	SRA=SRR1543973
 	KMER=19
 
 #KMER 20
-elif [ $TARRAY -eq 17 ]; then
-	COV=1
-	KMER=20
-elif [ $TARRAY -eq 18 ]; then
-	COV=2
-	KMER=20
-elif [ $TARRAY -eq 19 ]; then
-	COV=4
-	KMER=20
-elif [ $TARRAY -eq 20 ]; then
-	COV=8
-	KMER=20
-elif [ $TARRAY -eq 21 ]; then
-	COV=16
-	KMER=20
-elif [ $TARRAY -eq 22 ]; then
-	COV=32
-	KMER=20
 elif [ $TARRAY -eq 23 ]; then
-	COV=64
+	SRA=SRR1543963
 	KMER=20
 elif [ $TARRAY -eq 24 ]; then
-	COV=128
+	SRA=SRR1543964
+	KMER=20
+elif [ $TARRAY -eq 25 ]; then
+	SRA=SRR1543965
+	KMER=20
+elif [ $TARRAY -eq 26 ]; then
+	SRA=SRR1543966
+	KMER=20
+elif [ $TARRAY -eq 27 ]; then
+	SRA=SRR1543967
+	KMER=20
+elif [ $TARRAY -eq 28 ]; then
+	SRA=SRR1543968
+	KMER=20
+elif [ $TARRAY -eq 29 ]; then
+	SRA=SRR1543969
+	KMER=20
+elif [ $TARRAY -eq 30 ]; then
+	SRA=SRR1543970
+	KMER=20
+elif [ $TARRAY -eq 31 ]; then
+	SRA=SRR1543971
+	KMER=20
+elif [ $TARRAY -eq 32 ]; then
+	SRA=SRR1543972
+	KMER=20
+elif [ $TARRAY -eq 33 ]; then
+	SRA=SRR1543973
 	KMER=20
 
 #KMER 21
-elif [ $TARRAY -eq 25 ]; then
-	COV=1
+elif [ $TARRAY -eq 34 ]; then
+	SRA=SRR1543963
 	KMER=21
-elif [ $TARRAY -eq 26 ]; then
-	COV=2
+elif [ $TARRAY -eq 35 ]; then
+	SRA=SRR1543964
 	KMER=21
-elif [ $TARRAY -eq 27 ]; then
-	COV=4
+elif [ $TARRAY -eq 36 ]; then
+	SRA=SRR1543965
 	KMER=21
-elif [ $TARRAY -eq 28 ]; then
-	COV=8
+elif [ $TARRAY -eq 37 ]; then
+	SRA=SRR1543966
 	KMER=21
-elif [ $TARRAY -eq 29 ]; then
-	COV=16
+elif [ $TARRAY -eq 38 ]; then
+	SRA=SRR1543967
 	KMER=21
-elif [ $TARRAY -eq 30 ]; then
-	COV=32
+elif [ $TARRAY -eq 39 ]; then
+	SRA=SRR1543968
 	KMER=21
-elif [ $TARRAY -eq 31 ]; then
-	COV=64
+elif [ $TARRAY -eq 40 ]; then
+	SRA=SRR1543969
 	KMER=21
-elif [ $TARRAY -eq 32 ]; then
-	COV=128
+elif [ $TARRAY -eq 41 ]; then
+	SRA=SRR1543970
+	KMER=21
+elif [ $TARRAY -eq 42 ]; then
+	SRA=SRR1543971
+	KMER=21
+elif [ $TARRAY -eq 43 ]; then
+	SRA=SRR1543972
+	KMER=21
+elif [ $TARRAY -eq 44 ]; then
+	SRA=SRR1543973
 	KMER=21
 
 #KMER 22
-elif [ $TARRAY -eq 33 ]; then
-	COV=1
+elif [ $TARRAY -eq 45 ]; then
+	SRA=SRR1543963
 	KMER=22
-elif [ $TARRAY -eq 34 ]; then
-	COV=2
+elif [ $TARRAY -eq 46 ]; then
+	SRA=SRR1543964
 	KMER=22
-elif [ $TARRAY -eq 35 ]; then
-	COV=4
+elif [ $TARRAY -eq 47 ]; then
+	SRA=SRR1543965
 	KMER=22
-elif [ $TARRAY -eq 36 ]; then
-	COV=8
+elif [ $TARRAY -eq 48 ]; then
+	SRA=SRR1543966
 	KMER=22
-elif [ $TARRAY -eq 37 ]; then
-	COV=16
+elif [ $TARRAY -eq 49 ]; then
+	SRA=SRR1543967
 	KMER=22
-elif [ $TARRAY -eq 38 ]; then
-	COV=32
+elif [ $TARRAY -eq 50 ]; then
+	SRA=SRR1543968
 	KMER=22
-elif [ $TARRAY -eq 39 ]; then
-	COV=64
+elif [ $TARRAY -eq 51 ]; then
+	SRA=SRR1543969
 	KMER=22
-elif [ $TARRAY -eq 40 ]; then
-	COV=128
+elif [ $TARRAY -eq 52 ]; then
+	SRA=SRR1543970
+	KMER=22
+elif [ $TARRAY -eq 53 ]; then
+	SRA=SRR1543971
+	KMER=22
+elif [ $TARRAY -eq 54 ]; then
+	SRA=SRR1543972
+	KMER=22
+elif [ $TARRAY -eq 55 ]; then
+	SRA=SRR1543973
 	KMER=22
 
 #KMER 23
-elif [ $TARRAY -eq 41 ]; then
-	COV=1
+elif [ $TARRAY -eq 56 ]; then
+	SRA=SRR1543963
 	KMER=23
-elif [ $TARRAY -eq 42 ]; then
-	COV=2
+elif [ $TARRAY -eq 57 ]; then
+	SRA=SRR1543964
 	KMER=23
-elif [ $TARRAY -eq 43 ]; then
-	COV=4
+elif [ $TARRAY -eq 58 ]; then
+	SRA=SRR1543965
 	KMER=23
-elif [ $TARRAY -eq 44 ]; then
-	COV=8
+elif [ $TARRAY -eq 59 ]; then
+	SRA=SRR1543966
 	KMER=23
-elif [ $TARRAY -eq 45 ]; then
-	COV=16
+elif [ $TARRAY -eq 60 ]; then
+	SRA=SRR1543967
 	KMER=23
-elif [ $TARRAY -eq 46 ]; then
-	COV=32
+elif [ $TARRAY -eq 61 ]; then
+	SRA=SRR1543968
 	KMER=23
-elif [ $TARRAY -eq 47 ]; then
-	COV=64
+elif [ $TARRAY -eq 62 ]; then
+	SRA=SRR1543969
 	KMER=23
-elif [ $TARRAY -eq 48 ]; then
-	COV=128
+elif [ $TARRAY -eq 63 ]; then
+	SRA=SRR1543970
+	KMER=23
+elif [ $TARRAY -eq 64 ]; then
+	SRA=SRR1543971
+	KMER=23
+elif [ $TARRAY -eq 65 ]; then
+	SRA=SRR1543972
+	KMER=23
+elif [ $TARRAY -eq 66 ]; then
+	SRA=SRR1543973
 	KMER=23
 
 #KMER 24
-elif [ $TARRAY -eq 49 ]; then
-	COV=1
+elif [ $TARRAY -eq 67 ]; then
+	SRA=SRR1543963
 	KMER=24
-elif [ $TARRAY -eq 50 ]; then
-	COV=2
+elif [ $TARRAY -eq 68 ]; then
+	SRA=SRR1543964
 	KMER=24
-elif [ $TARRAY -eq 51 ]; then
-	COV=4
+elif [ $TARRAY -eq 69 ]; then
+	SRA=SRR1543965
 	KMER=24
-elif [ $TARRAY -eq 52 ]; then
-	COV=8
+elif [ $TARRAY -eq 70 ]; then
+	SRA=SRR1543966
 	KMER=24
-elif [ $TARRAY -eq 53 ]; then
-	COV=16
+elif [ $TARRAY -eq 71 ]; then
+	SRA=SRR1543967
 	KMER=24
-elif [ $TARRAY -eq 54 ]; then
-	COV=32
+elif [ $TARRAY -eq 72 ]; then
+	SRA=SRR1543968
 	KMER=24
-elif [ $TARRAY -eq 55 ]; then
-	COV=64
+elif [ $TARRAY -eq 73 ]; then
+	SRA=SRR1543969
 	KMER=24
-elif [ $TARRAY -eq 56 ]; then
-	COV=128
+elif [ $TARRAY -eq 74 ]; then
+	SRA=SRR1543970
+	KMER=24
+elif [ $TARRAY -eq 75 ]; then
+	SRA=SRR1543971
+	KMER=24
+elif [ $TARRAY -eq 76 ]; then
+	SRA=SRR1543972
+	KMER=24
+elif [ $TARRAY -eq 77 ]; then
+	SRA=SRR1543973
 	KMER=24
 fi
 
@@ -232,13 +294,15 @@ fi
 
 #---------------------------------------------------------------------------------------------------------------------------------------
 
-#FOR RUNNING REPSEQ SIM TRA
+#FOR RUNNING REPSEQ REAL!! Though this is single end lets just use the paired end wrappers.
 ################### HOST/DATASET SPECIFIC ################################
-TRUE1="/u/flashscratch/k/keithgmi/S2_dataset_igor/S2_dataset/true_reads/TRA/sim_rl_${LENGTH}_cov_${COV}/true_1.fastq" # first read file
-RAW1="/u/flashscratch/k/keithgmi/S2_dataset_igor/S2_dataset/datasets/TRA/sim_rl_${LENGTH}_cov_${COV}/TRA.rep.seq_sim_rl_${LENGTH}_cov_${COV}_1.fastq" 
+TRUE1="/u/flashscratch/k/keithgmi/rep_seq_real/generate_rsr_data/true/${SRA}_true.fastq" # first read file
+RAW1="/u/flashscratch/k/keithgmi/rep_seq_real/generate_rsr_data/raw/${SRA}_raw.fastq" 
 
-TRUE2="/u/flashscratch/k/keithgmi/S2_dataset_igor/S2_dataset/true_reads/TRA/sim_rl_${LENGTH}_cov_${COV}/true_2.fastq" # second read file
-RAW2="/u/flashscratch/k/keithgmi/S2_dataset_igor/S2_dataset/datasets/TRA/sim_rl_${LENGTH}_cov_${COV}/TRA.rep.seq_sim_rl_${LENGTH}_cov_${COV}_2.fastq"
+
+#These will just point to blank files
+TRUE2="/u/flashscratch/k/keithgmi/rep_seq_real/generate_rsr_data/blank.fastq" 
+RAW2="/u/flashscratch/k/keithgmi/rep_seq_real/generate_rsr_data/blank.fastq"
 ################### HOST/DATASET SPECIFIC ################################
 
 #---------------------------------------------------------------------------------------------------------------------------------------
@@ -259,8 +323,6 @@ RAW2="/u/flashscratch/k/keithgmi/S2_dataset_igor/S2_dataset/datasets/TRA/sim_rl_
 
 ################### HOST SPECIFIC ################################
 #change the location of the .sh wrapper for each tool
-
- #qsub -cwd -V -N BFC$JOBNAME -l h_data=$HDATA,highp,time=$TIME -M $USER 
 
 if [ $TSET -eq 1 ]; then
 
