@@ -1,0 +1,8 @@
+START
+Mon Jul  2 20:17:47 PDT 2018 --- RUNNING echo
+python: can't open file 'ErrorCorrection.py': [Errno 2] No such file or directory
+Mon Jul  2 20:17:47 PDT 2018 --- TOTAL RUNTIME: 0:00:00:0.0659
+Mon Jul  2 20:17:47 PDT 2018 --- FINISHED RUNNING echo 
+Mon Jul  2 20:17:47 PDT 2018 --- TRANSFORMING OUTPUT
+Mon Jul  2 20:17:47 PDT 2018 --- TRANSFORMING OUTPUT DONE
+DONE

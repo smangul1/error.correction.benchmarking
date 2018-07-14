@@ -1,0 +1,22 @@
+START
+Fri Feb  9 16:51:39 PST 2018 --- RUNNING rcorrector
+./run.rcorrector.sh: line 89: /u/home/k/keithgmi/project-zarlab/rcorrector/Rcorrector: is a directory
+Fri Feb  9 16:51:39 PST 2018 --- TOTAL RUNTIME: 0:00:00:0.0052
+Fri Feb  9 16:51:39 PST 2018 --- FINISHED RUNNING rcorrector 
+Fri Feb  9 16:51:39 PST 2018 --- TRANSFORMING OUTPUT
+Fri Feb  9 16:51:39 PST 2018 --- TRANSFORMING OUTPUT DONE
+DONESTART
+Fri Feb  9 17:22:28 PST 2018 --- RUNNING rcorrector
+./run.rcorrector.sh: line 89: /u/home/k/keithgmi/project-zarlab/rcorrector/Rcorrector: is a directory
+Fri Feb  9 17:22:28 PST 2018 --- TOTAL RUNTIME: 0:00:00:0.0086
+Fri Feb  9 17:22:28 PST 2018 --- FINISHED RUNNING rcorrector 
+Fri Feb  9 17:22:28 PST 2018 --- TRANSFORMING OUTPUT
+Fri Feb  9 17:22:28 PST 2018 --- TRANSFORMING OUTPUT DONE
+DONESTART
+Fri Feb  9 17:33:59 PST 2018 --- RUNNING rcorrector
+./run.rcorrector.sh: line 89: /u/home/k/keithgmi/project-zarlab/rcorrector/Rcorrector: is a directory
+Fri Feb  9 17:33:59 PST 2018 --- TOTAL RUNTIME: 0:00:00:0.0084
+Fri Feb  9 17:33:59 PST 2018 --- FINISHED RUNNING rcorrector 
+Fri Feb  9 17:33:59 PST 2018 --- TRANSFORMING OUTPUT
+Fri Feb  9 17:34:00 PST 2018 --- TRANSFORMING OUTPUT DONE
+DONE
