@@ -1,0 +1,1 @@
+qsub -cwd -V -N gdrive_wgs -l h_data=24G,highp,time=12:00:00 -M $USER gdrive upload --parent 1ZM3qiDtP1FfSXDq3CvEnZBOXjAywwmuJ --recursive /u/flashscratch/k/keithgmi/wgs_simulation_igor/wgs_simulation/datasets
