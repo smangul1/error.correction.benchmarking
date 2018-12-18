@@ -1,15 +1,5 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-from altair import Chart
-
-# alt.renderers.enable('notebook')
-import altair as alt
 
 import pandas
-import ply
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import re
 
 
@@ -19,7 +9,7 @@ import re
 # data = pandas.read_csv("data/analysis_tra.csv")
 
 #TI and SRR
-data = pandas.read_csv("data/srr_and_t1.csv")
+data = pandas.read_csv("/Users/keithmitchell/Desktop/Repositories/error.correction.benchmarking/code.evaluation/master_summary.txt", index_col=False)
 
 
 ####################################################
@@ -27,6 +17,7 @@ data = pandas.read_csv("data/srr_and_t1.csv")
 def tool_name(list):
     tool_list = []
     for item in list:
+        print (item)
         item = item.replace("run.", '')
         item = item.replace(".sh", '')
         tool_list.append(item.capitalize())
@@ -52,7 +43,7 @@ def coverage(list):
     for item in list:
         try:
             m = re.search("cov_(\d+)", item)
-            coverage.append(str(m.groups()[0]) + 'X')
+            coverage.append(int(str(m.groups()[0])))
         except:
             coverage.append("NA")
 
@@ -77,7 +68,7 @@ def dataset(list):
 
     return dataset_list
 
-
+print (data.head())
 data["Tool"] = tool_name(data["Wrapper Name"])
 data["Coverage"] = coverage(data["EC Filename"])
 data["Length"] = length(data["EC Filename"])
@@ -99,7 +90,6 @@ data["Trim Percent"] = (data["Base - TP TRIM"] + data["Base - FP TRIM"])/data["T
 data["Trim Effeciency"] = (data["Base - TP TRIM"]/data["Base - FP TRIM"])
 
 
-print data.head()
 
 # z = data.groupby(["Tool", "Dataset", "Coverage"])["Base Sensitiviy"].mean()
 # y = data.groupby(["Tool", "Dataset", "Coverage"])["Base Precision"].mean()
@@ -110,75 +100,14 @@ print data.head()
 # tra = data[(data["Dataset"]=="TRA")]
 # rsr = data[(data["Dataset"]=="RSR")]
 # t1 = data[(data["Dataset"]=="T1")]
-
-
-# igh = data[(data["Dataset"]=="IGH")]
-t1 = data[(data["Dataset"]=="T1")]
-# t3 = data[(data["Dataset"]=="T3")]
-
-####################################################
-# tra.to_csv("data/tra.csv")
-# rsr.to_csv("data/rsr_for_r.csv")
-# t1.to_csv("data/t1_for_r.csv")
-# igh.to_csv("igh.csv")
-t1.to_csv("data/rdata/t1_cat.csv")
-# t3.to_csv("t3.csv")
+igh = data[(data["Dataset"]=="IGH")]
 
 
 ####################################################
-
-# alt.Chart(tra).mark_circle().encode(
-#     alt.X('Base Sensitiviy', scale=alt.Scale(zero=False)),
-#     alt.Y('Base Precision', scale=alt.Scale(zero=False, padding=1)),
-#     color='Tool',
-#     size='Coverage'
-# )
-
-# alt.Chart(igh).mark_circle().encode(
-#     alt.X('Base Sensitiviy', scale=alt.Scale(zero=False)),
-#     alt.Y('Base Precision', scale=alt.Scale(zero=False, padding=1)),
-#     color='Tool',
-#     size='Coverage'
-# )
-
-# alt.Chart(igh).mark_circle().encode(
-#     alt.X('Base Sensitiviy', scale=alt.Scale(zero=False)),
-#     alt.Y('Base Gain', scale=alt.Scale(zero=False, padding=1)),
-#     color='Tool',
-#     size='Coverage'
-# )
-
-igh = data[(data["Dataset"]=="IGH") & (data["Base Gain"]>-10)]
-
-tra = data[(data["Dataset"]=="TRA") & (data["Base Gain"]>-0.3)]
+# tra.to_csv("data/tra_from_master.csv")
+# rsr.to_csv("data/rsr_from_master.csv")
+# t1.to_csv("data/t1_from_master.csv")
+igh.to_csv("data/igh_from_master.csv")
+####################################################
 
 
-# alt.Chart(tra).mark_circle().encode(
-#     alt.X('Base Sensitiviy', scale=alt.Scale(zero=False)),
-#     alt.Y('Base Gain', scale=alt.Scale(zero=False, padding=1)),
-#     color='Tool',
-#     size='Coverage'
-# )
-
-igh = data[(data["Dataset"]=="IGH") & (data["Base Gain"]>-0.3)]
-
-
-# alt.Chart(igh).mark_circle().encode(
-#     alt.X('Base Precision', scale=alt.Scale(zero=False)),
-#     alt.Y('Base Gain', scale=alt.Scale(zero=False, padding=1)),
-#     color='Tool',
-#     size='Coverage'
-# )
-
-# alt.Chart(igh).mark_circle().encode(
-#     alt.X(alt.repeat("column"), type='quantitative'),
-#     alt.Y(alt.repeat("row"), type='quantitative'),
-#     color='Tool',
-#     size='Coverage'
-# ).properties(
-#     width=250,
-#     height=250
-# ).repeat(
-#     row=['Base Sensitiviy', 'Base Gain', 'Base Precision'],
-#     column=['Base Sensitiviy', 'Base Gain', 'Base Precision']
-# ).interactive()

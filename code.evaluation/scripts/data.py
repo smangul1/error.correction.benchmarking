@@ -1,18 +1,16 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
-from altair import Chart
-
-# alt.renderers.enable('notebook')
-import altair as alt
+# import matplotlib.pyplot as plt
+# import seaborn as sns
+# import pandas as pd
+# from altair import Chart
+#
+# # alt.renderers.enable('notebook')
+# import altair as alt
 
 import pandas
-import ply
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+
 import re
 
-data = pandas.read_csv("analysis.csv")
+data = pandas.read_csv("/Users/keithmitchell/Desktop/Repositories/error.correction.benchmarking/code.evaluation/scripts/data/analysis.csv")
 
 
 def tool_name(list):
@@ -83,7 +81,7 @@ data["Trim Percent"] = (data["Base - TP TRIM"] + data["Base - FP TRIM"])/data["T
 data["Trim Effeciency"] = (data["Base - TP TRIM"]/data["Base - FP TRIM"])
 
 
-print data.head()
+print (data.head())
 
 # z = data.groupby(["Tool", "Dataset", "Coverage"])["Base Sensitiviy"].mean()
 # y = data.groupby(["Tool", "Dataset", "Coverage"])["Base Precision"].mean()
@@ -101,7 +99,6 @@ igh.to_csv("igh.csv")
 t1.to_csv("t1.csv")
 t3.to_csv("t3.csv")
 
-print t1
 
 # alt.Chart(tra).mark_circle().encode(
 #     alt.X('Base Sensitiviy', scale=alt.Scale(zero=False)),
