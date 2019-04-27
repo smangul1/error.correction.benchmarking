@@ -8,18 +8,6 @@
 #   Functions Contained: umi_group, handle_UMIs, produce_true, get_consensus
 #####################################################################################
 
-# question for Serghei tomorrow:
-
-#   do we want all of these files together (meant to look into the paper but thought I would check to see if you know
-#       off the top of your head
-
-#   check reverse reads
-
-#   is it ok if a base does not get corrected, as in there is no consensus
-
-#   todo: make code in general fail gracefully and go to a log file
-
-
 
 from Bio import pairwise2, SeqIO
 import os

@@ -94,7 +94,6 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Produces EC Evaluation for either paired-end or single-end sequences.\
                                                  takes either 6, 5, or 4 arguments.( will adjust if needed)')
-    #TODO: do we need the gene length as well
     #TODO: should we specify the filename
     parser.add_argument('-wrapper', help='wrapper that was ran', required=True)
     parser.add_argument('-kmer', help='kmer size used to run the EC tool', required=True)

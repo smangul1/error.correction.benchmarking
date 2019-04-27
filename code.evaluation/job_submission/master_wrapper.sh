@@ -45,7 +45,6 @@ gdrivehash="${10}"
 # gdrivehash=0
 
 
-#these will act as the temp. directories
 ################### HOST SPECIFIC ################################
 
 outsummary="/u/flashscratch/k/keithgmi/ec_summary/"
@@ -162,15 +161,14 @@ fi
 
 
 ################### HOST SPECIFIC ################################
-#acts as temp directories (builds off of the first host specific variables
+# acts as temp directories (builds off of the first host specific variables
 # be sure to have a directory for each tool
-
 outdir="$outdir$tool/$key/"
 outdircompressed="/u/flashscratch/k/keithgmi/master_wrapper_compressed/$tool/$key/"
 mkdir $outdircompressed
 ################### HOST SPECIFIC ################################
 
-# 1.B) retrieve the proper ec file from the directory and the log... what to do with the log file????????????????????????????????????????
+# 1.B) retrieve the proper ec file from the directory and the log
 for filename in $outdir*;
 do
 	if [[ "$filename" == *"$rawcleaned"* ]] || [[ "$filename" == *"$raw2cleaned"* ]]; then
@@ -187,7 +185,6 @@ done
 
 echo "Error corrected file found?: $ecfound"
 
-# 1.C) unzip the ec file produced
 gunzip $ec
 
 unzippedec=${ec%.gz}
@@ -222,14 +219,6 @@ else
 
 	echo "Finished evaluation for a paired end set."
 fi
-
-
-## NOT planning on uploading the EC files
-# # should we specify something 
-# ecgdrive=1PWqI5IqUfCtKog4HodJYIqusjZtLAzSY
-# echo "Uploading the file $newec to google drive."
-# /u/home/k/keithgmi/code/./gdrive-linux-x64 upload --parent $ecgdrive $newec
-
 
 
 echo "----------------------------------------------------------------------------------"
