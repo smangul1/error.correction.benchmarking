@@ -68,7 +68,6 @@ if __name__ == "__main__":
     try:
         base_dir = r"C:\Users\Amanda Beth Chron\Desktop\rep_seq_testing"
     except:
-        #logging.warn('Example: python rep_seq.py "C:\Users\Amanda Beth Chron\Desktop\Research\EC3\gold.stadard\Rep.Seq\real\data"')
         logging.warn(
             'Example: python rep_seq.py "C:\Users\Amanda Beth Chron\Desktop\rep_seq_testing"')
         sys.exit()

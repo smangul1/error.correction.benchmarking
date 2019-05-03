@@ -4,8 +4,14 @@
 #   4/20/18
 #   supervisor: Serghei Mangul
 #   author: Keith Mitchell
-
-#  Functions Contained: msa, analyze_bases, analyze_reads
+"""
+Functions Contained:
+    msa - performs a multiple sequence alignment between the true, raw, and ec read
+          returns: a dict of each individual sequence from the alignment ("TRUE", "RAW", "EC")
+    analyze_bases - iterates through
+    analyze_reads -
+    handle_sequences -
+"""
 #####################################################################################
 
 from Bio import pairwise2, SeqIO
@@ -20,9 +26,13 @@ import time
 
 
 def msa(true_sequence, raw_sequence, ec_sequence, description):
+    #TODO
+    # create a temporary fasta for the msa to be performed on
     id_temp = uuid.uuid4()
+    # create a temporary fasta with id for the msa output
     id_msa = uuid.uuid4()
 
+    # alter directory based on where temporary msas can go (this can use a lot of memory)
     with open('/u/flashscratch/k/keithgmi/master_wrapper_msa/%s.fasta' %id_temp, 'w') as fasta:
         fasta.write(">TRUE\n")
         fasta.write(str(true_sequence) + '\n')
@@ -31,21 +41,24 @@ def msa(true_sequence, raw_sequence, ec_sequence, description):
         fasta.write(">EC\n")
         fasta.write(str(ec_sequence) + '\n')
 
+    # run the msa
     subprocess.call(["/u/home/k/keithgmi/tools/./muscle3.8.31_i86linux64",
                      "-in", "/u/flashscratch/k/keithgmi/master_wrapper_msa/%s.fasta" %id_temp,
                      "-out", "/u/flashscratch/k/keithgmi/master_wrapper_msa/%s.fasta" %id_msa])
 
+    # remove the temporary file from prior to the msa
     os.remove("/u/flashscratch/k/keithgmi/master_wrapper_msa/%s.fasta" % id_temp)
 
+    # parse the msa file to get each sequences we care about
     aligned = {"RAW": '',"TRUE": '', "EC": ''}
-
     fasta_msa = SeqIO.parse("/u/flashscratch/k/keithgmi/master_wrapper_msa/%s.fasta" % id_msa, 'fasta')
     for rec in fasta_msa:
         aligned[rec.description] = rec.seq
 
+    # remove the temporary file from after the msa
     os.remove("/u/flashscratch/k/keithgmi/master_wrapper_msa/%s.fasta" % id_msa)
 
-
+    # print this for debugging the MSA on in the log file on the hoffman which contains all system print.
     print description
     print "True:", aligned["TRUE"]
     print "Raw: ", aligned["RAW"]
@@ -58,6 +71,8 @@ def resolve_trim(true, raw, ec):
     tp_trim = 0
     position_calls_trim = {}
     position = 1
+
+    # start from the left
     for true_bp, raw_bp, ec_bp in zip(true, raw, ec):
         if ec_bp == '-':
             if raw_bp == true_bp:
@@ -70,6 +85,7 @@ def resolve_trim(true, raw, ec):
         else:
             break
 
+    # start from the right
     position = len(true)
     for true_bp, raw_bp, ec_bp in zip(reversed(true), reversed(raw), reversed(ec)):
         if ec_bp == '-':
@@ -86,14 +102,14 @@ def resolve_trim(true, raw, ec):
     return fp_trim, tp_trim, position_calls_trim
 
 
-def analyze_bases(true_3, raw_3, ec_3):
+def analyze_bases(true_read, raw_read, ec_read):
 
     #TODO this function here
     # base level statistics now that there is an "MSA" that we can compare.
     stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, 'FP TRIM': 0, 'TP TRIM': 0}
     position_calls = {}
 
-    trim_results = resolve_trim(true_3, raw_3, ec_3)
+    trim_results = resolve_trim(true_read, raw_read, ec_read)
     trim_positions = trim_results[2]
     tp_trim_count = trim_results[1]
     fp_trim_count = trim_results[0]
@@ -102,7 +118,7 @@ def analyze_bases(true_3, raw_3, ec_3):
 
     pos_marker = 1
     ec_bp, true_bp, raw_bp = "", "", ""
-    for true_bp, raw_bp, ec_bp in zip(true_3, raw_3, ec_3):
+    for true_bp, raw_bp, ec_bp in zip(true_read, raw_read, ec_read):
         if pos_marker in trim_positions.keys():
             pos_marker += 1
             continue
@@ -137,18 +153,15 @@ def analyze_bases(true_3, raw_3, ec_3):
             message = "ERROR Base Evaluation Case Was Not Found."
             print message
             my_log(base_dir_join, cleaned_filename, message)
-
-
         pos_marker += 1
 
-    length = len(true_3)
+    length = len(true_read)
     if length != sum(stats_dict.values()):
         message = "ERROR in Base Level Evaluation Summary"
         print message
         my_log(base_dir_join, cleaned_filename, message)
     position_calls.update(trim_positions)
     return stats_dict, length, position_calls
-
 
 
 def analyze_read(stats_dict, length):
@@ -188,15 +201,12 @@ def analyze_read(stats_dict, length):
         return "FN WRONG"
 
 
-
-
 def find_match(fastq, true):
     try:
         sequence = fastq[true]
         return sequence
     except:
         return None
-
 
 
 def handle_sequences(true_check, true_rec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser):
@@ -235,6 +245,7 @@ def handle_sequences(true_check, true_rec, two_raw, fastq_raw1_parser, fastq_raw
         message = 'It seems that no match was found for the sequence %s (Paired End) for the %s lookup' % (true_check[0], "RAW")
         my_log(base_dir_join, cleaned_filename, message)
 
+
 def make_dict(parsed_fastq):
     dict = {}
     for rec in parsed_fastq:
@@ -251,7 +262,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-base_dir', help='This is the directory to produce the raw sequences to', required=True)
     parser.add_argument('-true_1', help='This is the true file to be evaluated.', required=True)
-    parser.add_argument('-true_2', help='This is the true file to be evaluated.', required=False)
+    parser.add_argument('-true_2', help='This is the second true file to be evaluated.', required=False)
     parser.add_argument('-raw_1', help='This is the raw file to be evaluated.', required=True)
     parser.add_argument('-raw_2', help='This is the second raw file, if paired-end, to be evaluated.', required=False)
     parser.add_argument('-ec_1', help='This is the ec file to be evaluated.', required=True)

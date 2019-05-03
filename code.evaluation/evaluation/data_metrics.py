@@ -2,16 +2,8 @@
 import pandas
 import re
 
-
 ####################################################
-#TRA ??? I think! Should be in master summary2
-
-# data = pandas.read_csv("data/analysis_tra.csv")
-
-#TI and SRR
 data = pandas.read_csv("/Users/keithmitchell/Desktop/Repositories/error.correction.benchmarking/code.evaluation/master_summary.txt", index_col=False)
-
-
 ####################################################
 
 def tool_name(list):
@@ -82,10 +74,7 @@ data["Base Accuracy"] = (data["Base - TP"] + data["Base - TN"])/(data["Base - TP
 data["Dataset"] = dataset(data["EC Filename"])
 
 data["Trim Percent"] = (data["Base - TP TRIM"] + data["Base - FP TRIM"])/data["Total Bases"]
-                       # (data["Base - TP"] + data["Base - TN"] +
-                       #  data["Base - FP"] + data["Base - FN"] +
-                       #  data["Base - FP INDEL"] + data["Base - FP TRIM"] +
-                       #  data["Base - FN WRONG"] + data["Base - TP TRIM"])
+
 
 data["Trim Effeciency"] = (data["Base - TP TRIM"]/data["Base - FP TRIM"])
 

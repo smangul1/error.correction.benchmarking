@@ -31,7 +31,7 @@ TSET=$3
 ################### DATASET SPECIFIC ################################
 KMER=18                   # kmer length
 KMER2=3000000             # estimated number of all kmers
-GLEN=3000000000           # estimated genome length
+GLEN=3000000              # estimated genome length
 RLEN=$LENGTH              # maximum read length
 ################### DATASET SPECIFIC ################################
 

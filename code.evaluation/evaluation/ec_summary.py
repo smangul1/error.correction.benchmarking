@@ -4,8 +4,11 @@
 #   5/17/18
 #   supervisor: Serghei Mangul
 #   author: Keith Mitchell
-
-#  Functions Contained: check_existence, append_summary
+"""
+  Functions Contained
+    check_existence: checks if the filename supplied has already been written to (should append: 'a') else we use 'w'.
+    append_summary: appends the data from the read level and base level compression to a master or summary file.
+"""
 #####################################################################################
 
 from __future__ import division
@@ -21,8 +24,6 @@ def check_existence(out_dir, file_name):
 
 
 def append_summary(wrapper, kmer, read_data, base_data, ec_name, outdir, filename):
-    # list = "TN", "FP", "FP INDEL", "TP", "FN", "FN WRONG"
-    # stats_dict = {'TN': 0, 'TP': 0, 'FN': 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, 'FP TRIM': 0, 'TP TRIM': 0}
     read_sum = {"TN": 0, "TP": 0, "FN": 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, "Read Total": 0, "Not TN": 0, "Trimmed Total": 0}
     base_sum = {"Total Bases": 0, 'TP': 0, 'FN': 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, 'FP TRIM': 0, 'TP TRIM': 0, 'TN': 0}
     with open(read_data, 'r') as reads_csv:
@@ -33,10 +34,7 @@ def append_summary(wrapper, kmer, read_data, base_data, ec_name, outdir, filenam
                 read_sum[str(row[1])] += 1
                 read_sum["Not TN"] += 1
 
-
-
             base_reader = csv.reader(base_csv, delimiter=',')
-            # baseout.writerow([0 read_name, 1 length, 2 base_counts['TP'], 3 base_counts['FN'], 4 base_counts['FN WRONG'], 5 base_counts['FP'], 6 base_counts['FP INDEL'], 7 base_counts['FP TRIM'], 8 base_counts['TP TRIM']])
             for row in base_reader:
                 # NOTE: we take the "Read Total" here since we dont record TN reads but we record everything for
                 # base evaluation so we know this is the number of reads that were analyzed
@@ -55,25 +53,18 @@ def append_summary(wrapper, kmer, read_data, base_data, ec_name, outdir, filenam
                 base_sum["TP TRIM"] += int(row[8])
                 base_sum["TN"] += int(row[1]) - (int(row[2]) + int(row[3]) + int(row[4])
                                                  + int(row[5]) + int(row[6]) + int(row[7]) + int(row[8]))
-
-
             read_sum["TN"] = read_sum["Read Total"] - read_sum["Not TN"]
 
 
     type = check_existence(outdir, filename)
     with open(outdir + filename, type) as summaryout:
         summaryout = csv.writer(summaryout, delimiter=',')
-
-        # read_sum = {"TN": 0, "TP": 0, "FN": 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, "Read Total": 0, "Not TN": 0}
-        # base_sum = {"Total Bases": 0, 'TP': 0, 'FN': 0, 'FN WRONG': 0, 'FP': 0, 'FP INDEL': 0, 'FP TRIM': 0,
-        #             'TP TRIM': 0}
-
         if type == 'w':
             write_header=["EC Filename", "Wrapper Name", "Kmer Size",
-                            "Read - TP", "Read - TN", "Read - FN", "Read - FN WRONG", "Read - FP", "Read - FP INDEL", "Total Trimmed Reads", "Total Reads",
-                            "Base - TP", "Base - TN", "Base - FN", "Base - FN WRONG", "Base - FP", "Base - FP INDEL", "Base - FP TRIM", "Base - TP TRIM", "Total Bases"]
-                            # "Read - Recall", "Read - Precision", "Read - Gain",
-                            # "Base - Recall", "Base - Precision", "Base - Gain"]
+                          "Read - TP", "Read - TN", "Read - FN", "Read - FN WRONG", "Read - FP", "Read - FP INDEL",
+                          "Total Trimmed Reads", "Total Reads",
+                          "Base - TP", "Base - TN", "Base - FN", "Base - FN WRONG", "Base - FP", "Base - FP INDEL",
+                          "Base - FP TRIM", "Base - TP TRIM", "Total Bases"]
             summaryout.writerow(write_header)
 
         ec_cleaned = ec_name.split("/")
@@ -81,13 +72,13 @@ def append_summary(wrapper, kmer, read_data, base_data, ec_name, outdir, filenam
         wrapper_cleaned = wrapper.split("/")
         wrapper_cleaned = wrapper_cleaned[-1]
 
-        write_data=[ec_cleaned, wrapper_cleaned, kmer,
-                    read_sum["TP"], read_sum["TN"], read_sum["FN"], read_sum["FN WRONG"], read_sum["FP"], read_sum["FP INDEL"], read_sum["Trimmed Total"], read_sum["Read Total"],
-                    base_sum["TP"], base_sum["TN"], base_sum["FN"], base_sum["FN WRONG"], base_sum["FP"], base_sum["FP INDEL"], base_sum["FP TRIM"], base_sum["TP TRIM"], base_sum["Total Bases"]]
+        write_data = [ec_cleaned, wrapper_cleaned, kmer,
+                      read_sum["TP"], read_sum["TN"], read_sum["FN"], read_sum["FN WRONG"], read_sum["FP"],
+                      read_sum["FP INDEL"], read_sum["Trimmed Total"], read_sum["Read Total"],
+                      base_sum["TP"], base_sum["TN"], base_sum["FN"], base_sum["FN WRONG"], base_sum["FP"],
+                      base_sum["FP INDEL"], base_sum["FP TRIM"], base_sum["TP TRIM"], base_sum["Total Bases"]]
 
         summaryout.writerow(write_data)
-
-
 
 
 if __name__ == "__main__":
@@ -100,7 +91,8 @@ if __name__ == "__main__":
     parser.add_argument('-read_data', help='read data file from ec_evaluation', required=True)
     parser.add_argument('-base_data', help='base data file from ec_evaluation', required=True)
     parser.add_argument('-ec_name', help='name of the error corrected file produced from the wrapper', required=True)
-    parser.add_argument('-outdir', help='name of the error corrected file produced from the wrapper', required=True)
+    parser.add_argument('-outdir', help='outdir for the filename to be placed', required=True)
+    # parser.add_argument('-filename', help='output file name', required=True)
 
     args = vars(parser.parse_args())
     wrapper = args['wrapper']
@@ -109,6 +101,7 @@ if __name__ == "__main__":
     base_data = args['base_data']
     ec_name = args['ec_name']
     out_dir = args['outdir']
+    # filename = args['outdir']
 
     filename='master_summary2.txt'
     append_summary(wrapper, kmer, read_data, base_data, ec_name, out_dir, filename)
