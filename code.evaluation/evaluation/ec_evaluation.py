@@ -46,10 +46,10 @@ def msa(true_sequence, raw_sequence, ec_sequence, description):
     os.remove("/u/flashscratch/k/keithgmi/master_wrapper_msa/%s.fasta" % id_msa)
 
 
-    print description
-    print "True:", aligned["TRUE"]
-    print "Raw: ", aligned["RAW"]
-    print "EC:  ", aligned["EC"]
+    print (description)
+    print ("True:", aligned["TRUE"])
+    print ("Raw: ", aligned["RAW"])
+    print ("EC:  ", aligned["EC"])
 
     return aligned["TRUE"], aligned["RAW"], aligned["EC"]
 
@@ -135,7 +135,7 @@ def analyze_bases(true_3, raw_3, ec_3):
 
         else:
             message = "ERROR Base Evaluation Case Was Not Found."
-            print message
+            print (message)
             my_log(base_dir_join, cleaned_filename, message)
 
 
@@ -144,7 +144,7 @@ def analyze_bases(true_3, raw_3, ec_3):
     length = len(true_3)
     if length != sum(stats_dict.values()):
         message = "ERROR in Base Level Evaluation Summary"
-        print message
+        print (message)
         my_log(base_dir_join, cleaned_filename, message)
     position_calls.update(trim_positions)
     return stats_dict, length, position_calls
@@ -160,31 +160,31 @@ def analyze_read(stats_dict, length):
 
     # If all bases are the TN then the read is a TN.
     if stats_dict['TN'] == non_trim_summary:
-        print "TN"
+        print ("TN")
         return "TN"
 
     # If there are normal FP but no other FP(INDEL/trim) then the read is a normal FP.
     elif stats_dict['FP'] != 0 and stats_dict['FP INDEL'] == 0:
-        print "FP"
+        print ("FP")
         return "FP"
 
     # Next if there are FP from INDEL then the read is as well.
     elif stats_dict['FP INDEL'] != 0:
-        print "FP INDEL"
+        print ("FP INDEL")
         return "FP INDEL"
 
     # If there are any TP bases and no FN bases then the read is a TP
     elif stats_dict['TP'] != 0 and stats_dict['FN'] == 0 and stats_dict['FN WRONG'] == 0:
-        print "TP"
+        print ("TP")
         return "TP"
 
     # Otherwise the read is a FN
     elif stats_dict['FN'] != 0 and stats_dict['FN WRONG'] == 0:
-        print "FN"
+        print ("FN")
         return "FN"
 
     else:
-        print "FN WRONG"
+        print ("FN WRONG")
         return "FN WRONG"
 
 
@@ -223,7 +223,7 @@ def handle_sequences(true_check, true_rec, two_raw, fastq_raw1_parser, fastq_raw
                 position_calls = base_counts[2]
                 length = base_counts[1]
                 base_stats = base_counts[0]
-                print base_stats
+                print (base_stats)
                 read_class = analyze_read(base_stats, length)
 
 
@@ -239,7 +239,7 @@ def make_dict(parsed_fastq):
     dict = {}
     for rec in parsed_fastq:
         rec_id = rec.description.split()
-        print rec_id[0]
+        print (rec_id[0])
         dict[rec_id[0]] = rec.seq
     return dict
 
@@ -290,11 +290,11 @@ if __name__ == "__main__":
         fastq_raw1_parser = SeqIO.parse(os.path.join(str(raw1_filename)), 'fastq')
         fastq_raw2_parser = SeqIO.parse(os.path.join(str(raw2_filename)), 'fastq')
 
-        print "EC"
+        print ("EC")
         fastq_ec1 = make_dict(fastq_ec1_parser)
-        print "RAW1"
+        print ("RAW1")
         fastq_raw1 = make_dict(fastq_raw1_parser)
-        print "RAW2"
+        print ("RAW2")
         fastq_raw2 = make_dict(fastq_raw2_parser)
 
         for true1_rec, true2_rec in zip(fastq_true1_parser, fastq_true2_parser):
