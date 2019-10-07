@@ -23,7 +23,7 @@ def my_log(base_dir_join, file_name, message):
     storage_ext = '_log'
     type = check_existence(base_dir_join, storage_ext, file_name)
     with open(base_dir_join + file_name + storage_ext + '.txt', type) as logout:
-        print message
+        print (message)
         logout.write(str(message) + "\n")
 
 def store_base_data(base_dir_join, file_name, read_name, length, base_counts):
