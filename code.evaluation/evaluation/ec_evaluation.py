@@ -326,7 +326,12 @@ if __name__ == "__main__":
             fastq_raw1_parser = SeqIO.parse(os.path.join(str(raw1_filename)), 'fastq')
             fastq_raw2_parser = SeqIO.parse(os.path.join(str(raw2_filename)), 'fastq')
 
-            handle_sequences(true_check, true_rec, two_raw, fastq_raw1_parser, fastq_raw2_parser, fastq_ec1_parser)
+            #Lines added to transform generator pobject into dictionaries
+            fastq_ec1 = make_dict(fastq_ec1_parser)
+            fastq_raw1 = make_dict(fastq_raw1_parser)
+
+            #Changed the names of the variables fastq_raw1_parser to fastq_raw1 and fastq_ec1_parser to fastq_ec1
+            handle_sequences(true_check, true_rec, two_raw, fastq_raw1, fastq_raw2_parser, fastq_ec1)
 
 
     message = "DONE: %s" % (cleaned_filename)
